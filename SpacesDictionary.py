@@ -40,5 +40,6 @@ spaces = [
     {"name": "Super Tax",               "action": 5,    "is property": False},
     {"name": "Turing Heights",          "action": -1,   "is property": True, "prices": [8, 400, 50, 200, 600, 1400, 1700, 2000]},
 ]
+space_positions =[]
 
 ## Name, Action, Is Property, [Group, Cost, rent....]
