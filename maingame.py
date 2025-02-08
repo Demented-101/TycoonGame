@@ -60,6 +60,13 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.closebutton.setStyleSheet("QPushButton { background: transparent; border: none; }")
         self.closebutton.setToolTip("Close Game")
         self.closebutton.clicked.connect(self.closebuttonpressed) #call to function when close button is pressed
+        
+        self.bootIcon = qtw.QLabel(self)
+        bootpixmap = qtg.QPixmap(get_image_path("Bootresized1.png"))
+        self.bootIcon.setPixmap(bootpixmap)
+        self.bootIcon.setScaledContents(True)
+        self.bootIcon.setGeometry(1400,960,100,100)
+        print(get_image_path("Bootresizede1.png"))
   
         self.helpbutton = qtw.QPushButton("", self) # code to set up help button properties
         self.helpbutton.setIcon(qtg.QIcon(get_image_path("helpbutton.png")))
@@ -400,5 +407,6 @@ class diceRoll(qtw.QMainWindow):
 app = qtw.QApplication([])
 mw = StartWindow()
 '''CONOR. WHEN TESTING, CHANGE THE VALUE OF 'mw' TO THE NAME OF THE UI CLASS YOU WANT TO TEST. THIS WILL MAKE IT DISPLAY. love you'''
+
 
 app.exec_()
