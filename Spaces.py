@@ -21,7 +21,7 @@ class space:
         space_temp = SpaceDict.spaces[space]
         self.name = space_temp["name"]
         self.action = space_temp["action"]
-        self.position = SpaceDict.space_positions[self.space]
+        self.position = SpaceDict.space_positions[space]
         
         self.is_property = space_temp["is property"]
         if not self.is_property: return

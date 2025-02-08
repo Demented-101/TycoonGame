@@ -34,37 +34,50 @@ import time
 #Declaration of variables that require global scope (e.g. variables that may need to be used across multiple windows.)
 
 running:bool = False
+current_turn:int
 selectedPlayerNo = False
-noOfPlayers = 0
+noOfPlayers:int
 
-players:list[plyr.player]
-spaces:list[spce.space]
+players:list
+spaces:list
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #declaration of functions that require global scope (may be used across multiple windows)
 
-def get_image_path(name:str) -> str: ## just pass in the name of the image (including the .png or .jpg) and it will give u the path u need <3
-    #callum you're the best 
-    full_path:str = "IMG/" + name
+def get_image_path(name:str, folder:str) -> str:
+    ## name is the name of the image itself INCLUDING the .png or .jpg at the end
+    ## folder is the name of the folder the image is in, like PItems or Potluck
+    ## so to get an image from PNumberMenu, call "get_image_path("3players.png", "PNumberMenu")"
+    ## :D
+    full_path:str = "IMG/" + folder + "/" + name
     return full_path
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-#THE function used for the gameplay loop (the holy grail)
+def start(player_count:int) -> None:
+    print("START METHOD RUN")
+    
+    players = []
+    for i in range(player_count): 
+        players.append(plyr.player(i))
+        print(i)
+    
+    spaces = spce.load_spaces()
 
-def run():
-        running:bool = True
+def roll_complete(roll:int) -> None:
+    current_player = players[current_turn]
+    if not current_player.is_bankrupt:
+        for i in range(roll): 
+            current_player.move()
+            print(str(current_turn) + ": " + str(current_player.position))
+            time.sleep(0.1)
         
-        ## load the players and spaces
-        spaces = spce.load_spaces()
-        players = []
-        for i in range(noOfPlayers):
-            players.append(plyr.player(i))
+        print(str(current_turn) + " ends at: " + str(current_player.position))
+        current_player.move_finished(spaces[current_player.position])
         
-        current_turn:int = 0
-        while running:
-            pass
+        ## TODO - prompt purchase
+        ## TODO - prompt upgrade selection
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -74,11 +87,11 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         super().__init__()
         self.setWindowTitle("Property Tycoon") #Title of Window
         self.resize(1920,1080) #Adjusting size of background to fit the 1920x1080 scale
-        self.setStyleSheet("background-image: url(" + get_image_path("newbackground.png") + "); background-repeat: no-repeat; background-position: center;")
+        self.setStyleSheet("background-image: url(" + get_image_path("newbackground.png", "Board") + "); background-repeat: no-repeat; background-position: center;")
         #Background images
 
         self.closebutton = qtw.QPushButton("", self) #code to set up close button properties
-        self.closebutton.setIcon(qtg.QIcon(get_image_path("close-button-png-30225(1).png")))
+        self.closebutton.setIcon(qtg.QIcon(get_image_path("close-button-png-30225(1).png", "Exit")))
         self.closebutton.setIconSize(qtc.QSize(40, 40)) 
         self.closebutton.setGeometry(1860,10,50,50)
         self.closebutton.setStyleSheet("QPushButton { background: transparent; border: none; }")
@@ -86,14 +99,14 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.closebutton.clicked.connect(self.closebuttonpressed) #call to function when close button is pressed
         
         self.bootIcon = qtw.QLabel(self)
-        bootpixmap = qtg.QPixmap(get_image_path("Bootresized1.png"))
+        bootpixmap = qtg.QPixmap(get_image_path("Bootresized1.png", "PItems"))
         self.bootIcon.setPixmap(bootpixmap)
         self.bootIcon.setScaledContents(True)
         self.bootIcon.setGeometry(1400,960,100,100)
-        print(get_image_path("Bootresizede1.png"))
+        print(get_image_path("Bootresizede1.png", "PItems")) # you can rest now child - for the nightmare is over <3
   
         self.helpbutton = qtw.QPushButton("", self) # code to set up help button properties
-        self.helpbutton.setIcon(qtg.QIcon(get_image_path("helpbutton.png")))
+        self.helpbutton.setIcon(qtg.QIcon(get_image_path("helpbutton.png", "Help")))
         self.helpbutton.setIconSize(qtc.QSize(60, 60)) 
         self.helpbutton.setGeometry(1805,10,50,50)
         self.helpbutton.setStyleSheet("QPushButton { background: transparent; border: none; }")
@@ -102,16 +115,15 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         
         #TEST BUTTON TO IMPLEMENT DICE ROLL
 
-        self.diceRollTest = qtw.QPushButton("", self)
-        self.diceRollTest.setIcon(qtg.QIcon(get_image_path("rollbutton.png")))
-        self.diceRollTest.setIconSize(qtc.QSize(300, 100)) 
-        self.diceRollTest.setGeometry(40,10,300,100)
-        self.diceRollTest.setStyleSheet("QPushButton { background: transparent; border: none; }")
-        self.diceRollTest.setToolTip("roll")
-        self.diceRollTest.clicked.connect(self.diceRollPressed)
+        if False: ## turn this to true to reimplement the button :D
+            self.diceRollTest = qtw.QPushButton("", self)
+            self.diceRollTest.setIcon(qtg.QIcon(get_image_path("rollbutton.png", "Dice")))
+            self.diceRollTest.setIconSize(qtc.QSize(300, 100)) 
+            self.diceRollTest.setGeometry(40,10,300,100)
+            self.diceRollTest.setStyleSheet("QPushButton { background: transparent; border: none; }")
+            self.diceRollTest.setToolTip("roll")
+            self.diceRollTest.clicked.connect(self.diceRollPressed)
         
-  
-        run()
         self.showFullScreen() #display main window
 
     def closebuttonpressed(self): #close main window
@@ -123,6 +135,10 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.help_window_open.show()
         
     def diceRollPressed(self):
+        self.dice_roll_open = diceRoll()
+        self.dice_roll_open.show()
+    
+    def promptDiceRoll(self):
         self.dice_roll_open = diceRoll()
         self.dice_roll_open.show()
   
@@ -144,14 +160,14 @@ class HelpWindow (qtw.QMainWindow):
         self.background_label = QLabel()
         self.background_label.setAlignment(Qt.AlignTop) #align label to the top of the window
 
-        self.original_pixmap = QPixmap(get_image_path("HelpPageBackground.png")) #loading background image as a pixmap
+        self.original_pixmap = QPixmap(get_image_path("HelpPageBackground.png", "Help")) #loading background image as a pixmap
 
 
         self.update_pixmap_size()  # Initial scaling
         
         help_close_button = QPushButton("") #code to set up properties of close button for help window
         help_close_button.clicked.connect(self.close)
-        help_close_button.setIcon(qtg.QIcon(get_image_path("close-button-png-30225(1).png")))
+        help_close_button.setIcon(qtg.QIcon(get_image_path("close-button-png-30225(1).png", "Exit")))
         help_close_button.setStyleSheet("QPushButton { background: transparent; border: none; }")
         help_close_button.setIconSize(qtc.QSize(30, 30))
         help_close_button.setToolTip("Close Window")
@@ -208,38 +224,38 @@ class StartWindow(qtw.QMainWindow): #code for the start window in which the numb
         super().__init__()
         self.setWindowTitle("Pick Number of Players")
         self.resize(500, 650)
-        self.setStyleSheet("background-image: url('" + get_image_path("startscreen.png") + "'); background-repeat: no-repeat; background-position: center;")
+        self.setStyleSheet("background-image: url('" + get_image_path("startscreen.png", "PNumberMenu") + "'); background-repeat: no-repeat; background-position: center;")
 
         self.players1 = qtw.QPushButton("", self)
-        self.players1.setIcon(qtg.QIcon(get_image_path("1players.png")))
+        self.players1.setIcon(qtg.QIcon(get_image_path("1players.png", "PNumberMenu")))
         self.players1.setIconSize(qtc.QSize(300, 200))
         self.players1.setGeometry(100, 150, 300, 90)  
         self.players1.setStyleSheet("QPushButton { background: transparent; border: none; }")
         self.players1.clicked.connect(lambda: self.load_players(1))
 
         self.players2 = qtw.QPushButton("", self)
-        self.players2.setIcon(qtg.QIcon(get_image_path("2players.png")))
+        self.players2.setIcon(qtg.QIcon(get_image_path("2players.png", "PNumberMenu")))
         self.players2.setIconSize(qtc.QSize(300, 200))
         self.players2.setGeometry(100, 240, 300, 90)  
         self.players2.setStyleSheet("QPushButton { background: transparent; border: none; }")
         self.players2.clicked.connect(lambda: self.load_players(2))
 
         self.players3 = qtw.QPushButton("", self)
-        self.players3.setIcon(qtg.QIcon(get_image_path("3players.png")))
+        self.players3.setIcon(qtg.QIcon(get_image_path("3players.png", "PNumberMenu")))
         self.players3.setIconSize(qtc.QSize(300, 200))
         self.players3.setGeometry(100, 330, 300, 90)  
         self.players3.setStyleSheet("QPushButton { background: transparent; border: none; }")
         self.players3.clicked.connect(lambda: self.load_players(3))
 
         self.players4 = qtw.QPushButton("", self)
-        self.players4.setIcon(qtg.QIcon(get_image_path("4players.png")))
+        self.players4.setIcon(qtg.QIcon(get_image_path("4players.png", "PNumberMenu")))
         self.players4.setIconSize(qtc.QSize(300, 200))
         self.players4.setGeometry(100, 420, 300, 90)  
         self.players4.setStyleSheet("QPushButton { background: transparent; border: none; }")
         self.players4.clicked.connect(lambda: self.load_players(4))
 
         self.players5 = qtw.QPushButton("", self)
-        self.players5.setIcon(qtg.QIcon(get_image_path("5players.png")))
+        self.players5.setIcon(qtg.QIcon(get_image_path("5players.png", "PNumberMenu")))
         self.players5.setIconSize(qtc.QSize(300, 200))
         self.players5.setGeometry(100, 510, 300, 90)  
         self.players5.setStyleSheet("QPushButton { background: transparent; border: none; }")
@@ -250,10 +266,11 @@ class StartWindow(qtw.QMainWindow): #code for the start window in which the numb
     ## henry you did NOT need 5 seperate methods for this shit lmfao
     def load_players(self, count:int):
         selectedPlayerNo = True
+        noOfPlayers = count
+        start(count)
         self.openWindow1 = MainWindow()
+        self.openWindow1.promptDiceRoll()
         self.close()
-        noOfPlayers - count
-        print(noOfPlayers)
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
      
@@ -280,17 +297,17 @@ class diceRoll(qtw.QMainWindow):
         super().__init__()
         self.setWindowTitle("Dice Roll")
         self.resize(617,360)
-        self.setStyleSheet("background-image: url('"+ get_image_path("bluebackground.jpg") +"'); background-repeat: no-repeat;")
+        self.setStyleSheet("background-image: url('"+ get_image_path("bluebackground.jpg", "Dice") +"'); background-repeat: no-repeat;")
         
         ## load images for dice and totals - saves loading this millions of times over later
-        for i in range(1,7):self.dice_images.append(QPixmap(get_image_path("dice-" + str(i) + ".png")))
-        for i in range(2,13): self.result_images.append(QPixmap(get_image_path("Total-" + str(i) + ".png")))
+        for i in range(1,7):self.dice_images.append(QPixmap(get_image_path("dice-" + str(i) + ".png", "Dice")))
+        for i in range(2,13): self.result_images.append(QPixmap(get_image_path("Total-" + str(i) + ".png", "Dice")))
         
         self.diceRollButton = QPushButton("", self) #setting up properties of dice roll button 
-        self.diceRollButton.clicked.connect(self.rollAnimation)
         self.diceRollButton.setGeometry(158, 200, 300, 200)
+        self.diceRollButton.clicked.connect(self.rollAnimation)
         self.diceRollButton.setToolTip("Roll")
-        self.diceRollButton.setIcon(qtg.QIcon(get_image_path("rollbutton.png")))
+        self.diceRollButton.setIcon(qtg.QIcon(get_image_path("rollbutton.png", "Dice")))
         self.diceRollButton.setStyleSheet("QPushButton { background: transparent; border: none; }")
         self.diceRollButton.setIconSize(qtc.QSize(300, 200))
         
@@ -329,10 +346,8 @@ class diceRoll(qtw.QMainWindow):
         self.noOfRolls = 0
         self.animationCounter = 0
         
-        
-              
         self.show()
-        
+    
     def rollAnimation(self): 
         self.announcementLabel.setPixmap(qtg.QPixmap()) 
         self.DoubleRollLabel.setStyleSheet("background: transparent; border: none;")
@@ -349,13 +364,10 @@ class diceRoll(qtw.QMainWindow):
             self.animationCounter += 1
             qtm.singleShot(150, self.rollAnimation)  #wait 150ms, then reset then go again after incrementing the counter.
         else:
-            #once animation completes, roll the actual dice
             self.diceRollMethod()
     
     def diceRollMethod(self):
-        
         self.animationCounter = 0 #reset the animation counter so that it can run again if a double is rolled.
-        
         
         diceRoll1 = ran.randint(1, 6) #conor, when testing for double rolls, you can change these values both to the same integer to force a double roll x
         diceRoll2 = ran.randint(1, 6)
@@ -363,22 +375,20 @@ class diceRoll(qtw.QMainWindow):
         total = diceRoll1 + diceRoll2
         
         if diceRoll1 == 4 and diceRoll2 == 3: #ignore this 
-            self.conor.setStyleSheet("background-image: url("+ get_image_path("Snapchat-675243558.jpg") +"); background-repeat: no-repeat; background-position: center;")
+            self.conor.setStyleSheet("background-image: url("+ get_image_path("Snapchat-675243558.jpg", "Other") +"); background-repeat: no-repeat; background-position: center;")
             qtm.singleShot(500, self.resetConor)
         
-        if diceRoll1 == diceRoll2: #if a double is rolled....
+        if diceRoll1 == diceRoll2 and False: #if a double is rolled.... !! CURRENTLY DISABLED
             self.diceRollButton.setDisabled(False) #restore buttons functionality to allow player to roll again
             self.noOfRolls = self.noOfRolls + 1 #increment roll counter
             if self.noOfRolls >= 2: #if another double is rolled...
-                self.goToJailLabel.setStyleSheet("background-image: url('"+ get_image_path("ANOTHER-DOUBLE-GO-TO-JAIL-07-02-2025.png") +"'); background-repeat: no-repeat; background-position: center;")
+                self.goToJailLabel.setStyleSheet("background-image: url('"+ get_image_path("ANOTHER-DOUBLE-GO-TO-JAIL-07-02-2025.png", "Dice") +"'); background-repeat: no-repeat; background-position: center;")
                 self.diceRollButton.setDisabled(True) #user can only press dice roll button once
-                qtm.singleShot(2000, self.close) #close after 3s
                 #CALUM, SEND TO JAIL FUNCTION HERE!
             else:
-                self.DoubleRollLabel.setStyleSheet("background-image: url('"+ get_image_path("DOUBLE-ROLL-ROLL-AGAIN-07-02-2025.png") + "'); background-repeat: no-repeat; background-position: center;")
+                self.DoubleRollLabel.setStyleSheet("background-image: url('"+ get_image_path("DOUBLE-ROLL-ROLL-AGAIN-07-02-2025.png", "Dice") + "'); background-repeat: no-repeat; background-position: center;")
         else:
             self.diceRollButton.setDisabled(True)
-            qtm.singleShot(2000, self.close)
                 
             
         #CHANGING THE DICE ICONS BASED ON WHICH NUMBERS HAVE BEEN RANDOMLY SELECTED: (but BETTER!)
@@ -390,6 +400,7 @@ class diceRoll(qtw.QMainWindow):
         
         time.sleep(0.2)
         self.announcementLabel.setPixmap(self.result_images[total - 2])
+        roll_complete(total)
             
     def resetConor(self):
         self.conor.setStyleSheet("background: transparent; border: none;")
@@ -399,6 +410,5 @@ class diceRoll(qtw.QMainWindow):
 app = qtw.QApplication([])
 mw = StartWindow()
 '''CONOR. WHEN TESTING, CHANGE THE VALUE OF 'mw' TO THE NAME OF THE UI CLASS YOU WANT TO TEST. THIS WILL MAKE IT DISPLAY. love you'''
-
 
 app.exec_()
