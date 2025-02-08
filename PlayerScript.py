@@ -12,11 +12,14 @@ class player:
     is_bankrupt:bool = False
     position:int = 0
     money:int = 1500
-    properties:list
+    properties:list = []
     
     in_jail:bool = False
     jail_turns:int = 0
     GOOJ_cards:list[bool] ## true is opp, false is pot
+    
+    def __init__(self, index:int):
+        player_num = index
     
     def roll(self) -> None:
         if self.is_bankrupt: return ## nullify turn if bankrupt/not in game
