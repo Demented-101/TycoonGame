@@ -20,7 +20,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QTimer as qtm
 
-#Importing other libraries to use throughout the program BALALALALALALALALAAAAAAAA
+#Importing other libraries to use throughout the program 
 
 import random
 import sys
