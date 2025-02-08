@@ -37,53 +37,11 @@ noOfPlayers = 0
 
 #declaration of functions that require global scope (may be used across multiple windows)
 
+def get_image_path(name:str) -> str: ## just pass in the name of the image (including the .png or .jpg) and it will give u the path u need <3
+    full_path:str = "IMG/" + name
+    return full_path
+
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-'''
-COORDINATES FOR SPACES, GOING CLOCKWISE:
-
-GO (1400,960)
-OLD CREEK (1290,960)
-POT LUCK (1210,960)
-GANGSTERS PARADISE (1125,960)
-INCOME TAX (1040,960)
-BRIGHTON STATION (960,960)
-THE ANGELS DELIGHT (880,960)
-OPPORTUNITY KNOCKS (795,960)
-POTTER AVENUE (715,960)
-GRANGER DRIVE (635,960)
-JAIL - IN JAIL (535,940) 
-JAIL - JUST VISITING (480,1000)
-SKYWALKER DRIVE (510,850)
-TESLA POWER CO (510,770)
-WOOKIE HOLE (510,690)
-REY LANE (510,610)
-HOVE STATION (510,530)
-BISHOP DRIVE (510,450)
-POT LUCK (510,360)
-DUNHAM DRIVE (510,280)
-BROYLES LANE (510,200)
-FREE PARKING (525,85)
-YUE FEI SQUARE (635,85)
-OPPORTUNITY KNOCKS (710,85)
-MULAN ROUGE (790,85)
-HAN XIN GARDENS (880,85)
-FALMER STATION (960,85)
-SHATNER CLOSE (1040,85)
-PICARD AVENUE (1120,85)
-EDISON WATER (1200,85)
-CRUSHER CREEK (1285,85)
-GO TO JAIL (1400,85)
-SIRAT MEWS (1410,200)
-GHENGIS CRESCENT (1410,280)
-POT LUCK (1410,360)
-IBIS CLOSE (1410,450)
-PORSTLADE STATION (1410,530)
-OPPORTUNITY KNOCKS (1410,610)
-JAMES WEBB WAY (1410,690)
-SUPER TAX (1410,770)
-TURING HEIGHTS (1410,850)
-'''
 
 class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
     def __init__(self):
@@ -91,11 +49,11 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         super().__init__()
         self.setWindowTitle("Property Tycoon") #Title of Window
         self.resize(1920,1080) #Adjusting size of background to fit the 1920x1080 scale
-        self.setStyleSheet("background-image: url('C:/Users/henry/OneDrive/Desktop/Software Engineering/newbackground.png'); background-repeat: no-repeat; background-position: center;")
+        self.setStyleSheet("background-image: url(" + get_image_path("newbackground.png") + "); background-repeat: no-repeat; background-position: center;")
         #Background images
 
         self.closebutton = qtw.QPushButton("", self) #code to set up close button properties
-        self.closebutton.setIcon(qtg.QIcon("C:/Users/henry/OneDrive/Desktop/Software Engineering/close-button-png-30225(1).png"))
+        self.closebutton.setIcon(qtg.QIcon(get_image_path("close-button-png-30225(1).png")))
         self.closebutton.setIconSize(qtc.QSize(40, 40)) 
         self.closebutton.setGeometry(1860,10,50,50)
         self.closebutton.setStyleSheet("QPushButton { background: transparent; border: none; }")
@@ -103,7 +61,7 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.closebutton.clicked.connect(self.closebuttonpressed) #call to function when close button is pressed
   
         self.helpbutton = qtw.QPushButton("", self) # code to set up help button properties
-        self.helpbutton.setIcon(qtg.QIcon("C:/Users/henry/OneDrive/Desktop/Software Engineering/helpbutton.png"))
+        self.helpbutton.setIcon(qtg.QIcon(get_image_path("helpbutton.png")))
         self.helpbutton.setIconSize(qtc.QSize(60, 60)) 
         self.helpbutton.setGeometry(1805,10,50,50)
         self.helpbutton.setStyleSheet("QPushButton { background: transparent; border: none; }")
@@ -113,7 +71,7 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         #TEST BUTTON TO IMPLEMENT DICE ROLL
 
         self.diceRollTest = qtw.QPushButton("", self)
-        self.diceRollTest.setIcon(qtg.QIcon("C:/Users/henry/OneDrive/Desktop/Software Engineering/rollbutton.png"))
+        self.diceRollTest.setIcon(qtg.QIcon(get_image_path("rollbutton.png")))
         self.diceRollTest.setIconSize(qtc.QSize(300, 100)) 
         self.diceRollTest.setGeometry(40,10,300,100)
         self.diceRollTest.setStyleSheet("QPushButton { background: transparent; border: none; }")
@@ -218,7 +176,7 @@ class StartWindow(qtw.QMainWindow): #code for the start window in which the numb
         super().__init__()
         self.setWindowTitle("Pick Number of Players")
         self.resize(500, 650)
-        self.setStyleSheet("background-image: url('C:/Users/henry/OneDrive/Desktop/Software Engineering/startscreen.png'); background-repeat: no-repeat; background-position: center;")
+        self.setStyleSheet("background-image: url('" + get_image_path("startscreen.png") + "'); background-repeat: no-repeat; background-position: center;")
 
 
         self.players1 = qtw.QPushButton("", self)
@@ -331,14 +289,14 @@ class diceRoll(qtw.QMainWindow):
         super().__init__()
         self.setWindowTitle("Dice Roll")
         self.resize(617,360)
-        self.setStyleSheet("background-image: url('C:/Users/henry/OneDrive/Desktop/Software Engineering/deep-sky-blue-gradient-color-thumbnail-web-banner-creative-template-background-free-vector.jpg'); background-repeat: no-repeat;")
+        self.setStyleSheet("background-image: url('"+ get_image_path("bluebackground.jpg") +"'); background-repeat: no-repeat;")
         
         
         self.diceRollButton = QPushButton("", self) #setting up properties of dice roll button 
         self.diceRollButton.clicked.connect(self.rollAnimation)
         self.diceRollButton.setGeometry(158, 200, 300, 200)
         self.diceRollButton.setToolTip("Roll")
-        self.diceRollButton.setIcon(qtg.QIcon("C:/Users/henry/OneDrive/Desktop/Software Engineering/rollbutton.png"))
+        self.diceRollButton.setIcon(qtg.QIcon(get_image_path("rollbutton.png")))
         self.diceRollButton.setStyleSheet("QPushButton { background: transparent; border: none; }")
         self.diceRollButton.setIconSize(qtc.QSize(300, 200))
         
@@ -392,44 +350,42 @@ class diceRoll(qtw.QMainWindow):
             randomface2 = random.randint(1, 6)
             
             if randomface1 == 1:
-                pixmapDice1_1_roll = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-one (1).png")
+                pixmapDice1_1_roll = QPixmap(get_image_path("dice-1.png"))
                 self.dice1.setPixmap(pixmapDice1_1_roll)
             if randomface1 == 2:
-                pixmapDice1_2_roll = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-two.png")
+                pixmapDice1_2_roll = QPixmap(get_image_path("dice-2.png"))
                 self.dice1.setPixmap(pixmapDice1_2_roll)
             if randomface1 == 3:
-                pixmapDice1_3_roll = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-three.png")
+                pixmapDice1_3_roll = QPixmap(get_image_path("dice-3.png"))
                 self.dice1.setPixmap(pixmapDice1_3_roll)
             if randomface1 == 4:
-                pixmapDice1_4_roll = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-four.png")
+                pixmapDice1_4_roll = QPixmap(get_image_path("dice-4.png"))
                 self.dice1.setPixmap(pixmapDice1_4_roll)
             if randomface1 == 5:
-                pixmapDice1_5_roll = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-five.png")
+                pixmapDice1_5_roll = QPixmap(get_image_path("dice-5.png"))
                 self.dice1.setPixmap(pixmapDice1_5_roll)
             if randomface1 == 6:
-                pixmapDice1_6_roll = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-six.png")
+                pixmapDice1_6_roll = QPixmap(get_image_path("dice-6.png"))
                 self.dice1.setPixmap(pixmapDice1_6_roll)
                 
             if randomface2 == 1:
-                pixmapDice2_1_roll = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-one (1).png")
-                self.dice2.setPixmap(pixmapDice2_1_roll)
+                pixmapDice1_1_roll = QPixmap(get_image_path("dice-1.png"))
+                self.dice2.setPixmap(pixmapDice1_1_roll)
             if randomface2 == 2:
-                pixmapDice2_2_roll = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-two.png")
-                self.dice2.setPixmap(pixmapDice2_2_roll)
+                pixmapDice1_2_roll = QPixmap(get_image_path("dice-2.png"))
+                self.dice2.setPixmap(pixmapDice1_2_roll)
             if randomface2 == 3:
-                pixmapDice2_3_roll = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-three.png")
-                self.dice2.setPixmap(pixmapDice2_3_roll)
+                pixmapDice1_3_roll = QPixmap(get_image_path("dice-3.png"))
+                self.dice2.setPixmap(pixmapDice1_3_roll)
             if randomface2 == 4:
-                pixmapDice2_4_roll = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-four.png")
-                self.dice2.setPixmap(pixmapDice2_4_roll)
+                pixmapDice1_4_roll = QPixmap(get_image_path("dice-4.png"))
+                self.dice2.setPixmap(pixmapDice1_4_roll)
             if randomface2 == 5:
-                pixmapDice2_5_roll = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-five.png")
-                self.dice2.setPixmap(pixmapDice2_5_roll)
+                pixmapDice1_5_roll = QPixmap(get_image_path("dice-5.png"))
+                self.dice2.setPixmap(pixmapDice1_5_roll)
             if randomface2 == 6:
-                pixmapDice2_6_roll = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-six.png")
-                self.dice2.setPixmap(pixmapDice2_6_roll)
-
-            
+                pixmapDice1_6_roll = QPixmap(get_image_path("dice-6.png"))
+                self.dice2.setPixmap(pixmapDice1_6_roll)
 
             self.animationCounter += 1
             qtm.singleShot(150, self.rollAnimation)  #wait 150ms, then reset then go again after incrementing the counter.
@@ -448,14 +404,14 @@ class diceRoll(qtw.QMainWindow):
         total = diceRoll1 + diceRoll2
         
         if diceRoll1 == 4 and diceRoll2 == 3: #ignore this 
-            self.conor.setStyleSheet("background-image: url(C:/Users/henry/OneDrive/Desktop/Software Engineering/Snapchat-675243558.jpg); background-repeat: no-repeat; background-position: center;")
+            self.conor.setStyleSheet("background-image: url("+ get_image_path("Snapchat-675243558.jpg") +"); background-repeat: no-repeat; background-position: center;")
             qtm.singleShot(500, self.resetConor)
         
         if diceRoll1 == diceRoll2: #if a double is rolled....
             self.diceRollButton.setDisabled(False) #restore buttons functionality to allow player to roll again
             self.noOfRolls = self.noOfRolls + 1 #increment roll counter
             if self.noOfRolls >= 2: #if another double is rolled...
-                self.goToJailLabel.setStyleSheet("background-image: url('C:/Users/henry/OneDrive/Desktop/Software Engineering/ANOTHER-DOUBLE-GO-TO-JAIL-07-02-2025.png'); background-repeat: no-repeat; background-position: center;")
+                self.goToJailLabel.setStyleSheet("background-image: url('"+ get_image_path("ANOTHER-DOUBLE-GO-TO-JAIL-07-02-2025.png") +"'); background-repeat: no-repeat; background-position: center;")
                 self.diceRollButton.setDisabled(True) #user can only press dice roll button once
                 qtm.singleShot(2000, self.close) #close after 3s
                 #CALUM, SEND TO JAIL FUNCTION HERE!
