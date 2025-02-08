@@ -38,6 +38,7 @@ noOfPlayers = 0
 #declaration of functions that require global scope (may be used across multiple windows)
 
 def get_image_path(name:str) -> str: ## just pass in the name of the image (including the .png or .jpg) and it will give u the path u need <3
+    #callum you're the best 
     full_path:str = "IMG/" + name
     return full_path
 
