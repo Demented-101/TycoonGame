@@ -112,25 +112,22 @@ class HelpWindow (qtw.QMainWindow):
         self.background_label = QLabel()
         self.background_label.setAlignment(Qt.AlignTop) #align label to the top of the window
 
-        self.original_pixmap = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/HelpPageBackground.png") #loading background image as a pixmap
+        self.original_pixmap = QPixmap(get_image_path("HelpPageBackground.png")) #loading background image as a pixmap
 
 
         self.update_pixmap_size()  # Initial scaling
         
         help_close_button = QPushButton("") #code to set up properties of close button for help window
         help_close_button.clicked.connect(self.close)
-        help_close_button.setIcon(qtg.QIcon("C:/Users/henry/OneDrive/Desktop/Software Engineering/close-button-png-30225(1).png"))
+        help_close_button.setIcon(qtg.QIcon(get_image_path("close-button-png-30225(1).png")))
         help_close_button.setStyleSheet("QPushButton { background: transparent; border: none; }")
         help_close_button.setIconSize(qtc.QSize(30, 30))
         help_close_button.setToolTip("Close Window")
-
-        
 
     
         helplayout.addWidget(self.background_label) #in this block of code we add our labels/buttons to our QVBoxLayout 
         helplayout.addWidget(help_close_button, alignment=Qt.AlignCenter)
 
-    
     
         scroll_area = QScrollArea(self) #scroll bar
         scroll_area.setWidgetResizable(True)
@@ -161,7 +158,6 @@ class HelpWindow (qtw.QMainWindow):
 
 class StartWindow(qtw.QMainWindow): #code for the start window in which the number of players is decided.
     
-    
     '''
     
     NOTES FOR CONOR:
@@ -179,37 +175,36 @@ class StartWindow(qtw.QMainWindow): #code for the start window in which the numb
         self.resize(500, 650)
         self.setStyleSheet("background-image: url('" + get_image_path("startscreen.png") + "'); background-repeat: no-repeat; background-position: center;")
 
-
         self.players1 = qtw.QPushButton("", self)
-        self.players1.setIcon(qtg.QIcon("C:/Users/henry/OneDrive/Desktop/Software Engineering/1players.png"))
+        self.players1.setIcon(qtg.QIcon(get_image_path("1players.png")))
         self.players1.setIconSize(qtc.QSize(300, 200))
         self.players1.setGeometry(100, 150, 300, 90)  
         self.players1.setStyleSheet("QPushButton { background: transparent; border: none; }")
         self.players1.clicked.connect(self.player1)
 
         self.players2 = qtw.QPushButton("", self)
-        self.players2.setIcon(qtg.QIcon("C:/Users/henry/OneDrive/Desktop/Software Engineering/2players.png"))
+        self.players2.setIcon(qtg.QIcon(get_image_path("2players.png")))
         self.players2.setIconSize(qtc.QSize(300, 200))
         self.players2.setGeometry(100, 240, 300, 90)  
         self.players2.setStyleSheet("QPushButton { background: transparent; border: none; }")
         self.players2.clicked.connect(self.player2)
 
         self.players3 = qtw.QPushButton("", self)
-        self.players3.setIcon(qtg.QIcon("C:/Users/henry/OneDrive/Desktop/Software Engineering/3players.png"))
+        self.players3.setIcon(qtg.QIcon(get_image_path("3players.png")))
         self.players3.setIconSize(qtc.QSize(300, 200))
         self.players3.setGeometry(100, 330, 300, 90)  
         self.players3.setStyleSheet("QPushButton { background: transparent; border: none; }")
         self.players3.clicked.connect(self.player3)
 
         self.players4 = qtw.QPushButton("", self)
-        self.players4.setIcon(qtg.QIcon("C:/Users/henry/OneDrive/Desktop/Software Engineering/4players.png"))
+        self.players4.setIcon(qtg.QIcon(get_image_path("4players.png")))
         self.players4.setIconSize(qtc.QSize(300, 200))
         self.players4.setGeometry(100, 420, 300, 90)  
         self.players4.setStyleSheet("QPushButton { background: transparent; border: none; }")
         self.players4.clicked.connect(self.player4)
 
         self.players5 = qtw.QPushButton("", self)
-        self.players5.setIcon(qtg.QIcon("C:/Users/henry/OneDrive/Desktop/Software Engineering/5players.png"))
+        self.players5.setIcon(qtg.QIcon(get_image_path("5players.png")))
         self.players5.setIconSize(qtc.QSize(300, 200))
         self.players5.setGeometry(100, 510, 300, 90)  
         self.players5.setStyleSheet("QPushButton { background: transparent; border: none; }")
@@ -218,7 +213,6 @@ class StartWindow(qtw.QMainWindow): #code for the start window in which the numb
         self.show()  # Show the window
         
     '''CALLUM. HERE LIES THE VARIABLE THAT CONTAINS THE NUMBER OF PLAYERS (noOfPlayers). IT IS GLOBAL, FEEL FREE TO USE THEM IN OTHER CLASSES.'''
-
     def player1(self):
         selectedPlayerNo = True
         if selectedPlayerNo == True:
@@ -226,7 +220,6 @@ class StartWindow(qtw.QMainWindow): #code for the start window in which the numb
             self.close()
             noOfPlayers = 1 #HERE!
             print(noOfPlayers) #test
-
 
     def player2(self):
         selectedPlayerNo = True
@@ -236,8 +229,6 @@ class StartWindow(qtw.QMainWindow): #code for the start window in which the numb
             noOfPlayers = 2
             print(noOfPlayers) #test
 
-
-
     def player3(self):
         selectedPlayerNo = True
         if selectedPlayerNo == True:
@@ -246,8 +237,6 @@ class StartWindow(qtw.QMainWindow): #code for the start window in which the numb
             noOfPlayers = 3
             print(noOfPlayers) #test
 
-
-
     def player4(self):
         selectedPlayerNo = True
         if selectedPlayerNo == True:
@@ -255,8 +244,6 @@ class StartWindow(qtw.QMainWindow): #code for the start window in which the numb
             self.close()
             noOfPlayers = 4
             print(noOfPlayers) #test
-
-
 
     def player5(self):
         selectedPlayerNo = True
@@ -271,6 +258,9 @@ class StartWindow(qtw.QMainWindow): #code for the start window in which the numb
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
      
 class diceRoll(qtw.QMainWindow):
+    
+    dice_images:list = []
+    result_images:list = []
     
     '''
     NOTES FOR CONOR
@@ -292,6 +282,9 @@ class diceRoll(qtw.QMainWindow):
         self.resize(617,360)
         self.setStyleSheet("background-image: url('"+ get_image_path("bluebackground.jpg") +"'); background-repeat: no-repeat;")
         
+        ## load images for dice and totals - saves loading this millions of times over later
+        for i in range(1,7):self.dice_images.append(QPixmap(get_image_path("dice-" + str(i) + ".png")))
+        for i in range(2,13): self.result_images.append(QPixmap(get_image_path("Total-" + str(i) + ".png")))
         
         self.diceRollButton = QPushButton("", self) #setting up properties of dice roll button 
         self.diceRollButton.clicked.connect(self.rollAnimation)
@@ -347,47 +340,12 @@ class diceRoll(qtw.QMainWindow):
         
         self.diceRollButton.setDisabled(True) #immediately disable button so that it cannot be pressed again whilst the animation is still running.
         if self.animationCounter < 10: #repeat roll 10 times as part of the animation
-            randomface1 = random.randint(1, 6)
-            randomface2 = random.randint(1, 6)
-            
-            if randomface1 == 1:
-                pixmapDice1_1_roll = QPixmap(get_image_path("dice-1.png"))
-                self.dice1.setPixmap(pixmapDice1_1_roll)
-            if randomface1 == 2:
-                pixmapDice1_2_roll = QPixmap(get_image_path("dice-2.png"))
-                self.dice1.setPixmap(pixmapDice1_2_roll)
-            if randomface1 == 3:
-                pixmapDice1_3_roll = QPixmap(get_image_path("dice-3.png"))
-                self.dice1.setPixmap(pixmapDice1_3_roll)
-            if randomface1 == 4:
-                pixmapDice1_4_roll = QPixmap(get_image_path("dice-4.png"))
-                self.dice1.setPixmap(pixmapDice1_4_roll)
-            if randomface1 == 5:
-                pixmapDice1_5_roll = QPixmap(get_image_path("dice-5.png"))
-                self.dice1.setPixmap(pixmapDice1_5_roll)
-            if randomface1 == 6:
-                pixmapDice1_6_roll = QPixmap(get_image_path("dice-6.png"))
-                self.dice1.setPixmap(pixmapDice1_6_roll)
-                
-            if randomface2 == 1:
-                pixmapDice1_1_roll = QPixmap(get_image_path("dice-1.png"))
-                self.dice2.setPixmap(pixmapDice1_1_roll)
-            if randomface2 == 2:
-                pixmapDice1_2_roll = QPixmap(get_image_path("dice-2.png"))
-                self.dice2.setPixmap(pixmapDice1_2_roll)
-            if randomface2 == 3:
-                pixmapDice1_3_roll = QPixmap(get_image_path("dice-3.png"))
-                self.dice2.setPixmap(pixmapDice1_3_roll)
-            if randomface2 == 4:
-                pixmapDice1_4_roll = QPixmap(get_image_path("dice-4.png"))
-                self.dice2.setPixmap(pixmapDice1_4_roll)
-            if randomface2 == 5:
-                pixmapDice1_5_roll = QPixmap(get_image_path("dice-5.png"))
-                self.dice2.setPixmap(pixmapDice1_5_roll)
-            if randomface2 == 6:
-                pixmapDice1_6_roll = QPixmap(get_image_path("dice-6.png"))
-                self.dice2.setPixmap(pixmapDice1_6_roll)
+            randomface1 = random.randint(0,5)
+            self.dice1.setPixmap(self.dice_images[randomface1])
 
+            randomface2 = random.randint(0,5)
+            self.dice2.setPixmap(self.dice_images[randomface2])
+            
             self.animationCounter += 1
             qtm.singleShot(150, self.rollAnimation)  #wait 150ms, then reset then go again after incrementing the counter.
         else:
@@ -417,99 +375,25 @@ class diceRoll(qtw.QMainWindow):
                 qtm.singleShot(2000, self.close) #close after 3s
                 #CALUM, SEND TO JAIL FUNCTION HERE!
             else:
-                self.DoubleRollLabel.setStyleSheet("background-image: url('C:/Users/henry/OneDrive/Desktop/Software Engineering/DOUBLE-ROLL-ROLL-AGAIN-07-02-2025.png'); background-repeat: no-repeat; background-position: center;")
+                self.DoubleRollLabel.setStyleSheet("background-image: url('"+ get_image_path("DOUBLE-ROLL-ROLL-AGAIN-07-02-2025.png") + "'); background-repeat: no-repeat; background-position: center;")
         else:
             self.diceRollButton.setDisabled(True)
             qtm.singleShot(2000, self.close)
                 
             
-            
-        
-        #CHANGING THE DICE ICONS BASED ON WHICH NUMBERS HAVE BEEN RANDOMLY SELECTED:
+        #CHANGING THE DICE ICONS BASED ON WHICH NUMBERS HAVE BEEN RANDOMLY SELECTED: (but BETTER!)
 
-        if diceRoll1 == 1:
-            pixmapDice1_1 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-one (1).png")
-            self.dice1.setPixmap(pixmapDice1_1)
-        if diceRoll1 == 2:
-            pixmapDice1_2 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-two.png")
-            self.dice1.setPixmap(pixmapDice1_2)
-        if diceRoll1 == 3:
-            pixmapDice1_3 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-three.png")
-            self.dice1.setPixmap(pixmapDice1_3)
-        if diceRoll1 == 4:
-            pixmapDice1_4 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-four.png")
-            self.dice1.setPixmap(pixmapDice1_4)
-        if diceRoll1 == 5:
-            pixmapDice1_5 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-five.png")
-            self.dice1.setPixmap(pixmapDice1_5)
-        if diceRoll1 == 6:
-            pixmapDice1_6 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-six.png")
-            self.dice1.setPixmap(pixmapDice1_6)
-            
-            
-        if diceRoll2 == 1:
-            pixmapDice2_1 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-one (1).png")
-            self.dice2.setPixmap(pixmapDice2_1)
-        if diceRoll2 == 2:
-            pixmapDice2_2 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-two.png")
-            self.dice2.setPixmap(pixmapDice2_2)
-        if diceRoll2 == 3:
-            pixmapDice2_3 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-three.png")
-            self.dice2.setPixmap(pixmapDice2_3)
-        if diceRoll2 == 4:
-            pixmapDice2_4 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-four.png")
-            self.dice2.setPixmap(pixmapDice2_4)
-        if diceRoll2 == 5:
-            pixmapDice2_5 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-five.png")
-            self.dice2.setPixmap(pixmapDice2_5)
-        if diceRoll2 == 6:
-            pixmapDice2_6 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/dice-six-faces-six.png")
-            self.dice2.setPixmap(pixmapDice2_6)
-            
+        self.dice1.setPixmap(self.dice_images[diceRoll1 - 1])
+        self.dice2.setPixmap(self.dice_images[diceRoll2 - 1])
         
         #CHANGING THE OUTPUT OF OUR ANNOUNCEMENT LABEL BASED OFF OF WHAT OUR TOTAL IS:
         
         time.sleep(0.2)
-        
-        if total == 2:
-            pixmap_res1 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/YOUR-TOTAL-IS-2-06-02-2025.png")
-            self.announcementLabel.setPixmap(pixmap_res1)
-        if total == 3:
-            pixmap_res2 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/YOUR-TOTAL-IS-3-06-02-2025.png")
-            self.announcementLabel.setPixmap(pixmap_res2)
-        if total == 4:
-            pixmap_res3 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/YOUR-TOTAL-IS-4-06-02-2025.png")
-            self.announcementLabel.setPixmap(pixmap_res3)
-        if total == 5:
-            pixmap_res4 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/YOUR-TOTAL-IS-5-06-02-2025.png")
-            self.announcementLabel.setPixmap(pixmap_res4)
-        if total == 6:
-            pixmap_res5 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/YOUR-TOTAL-IS-6-06-02-2025.png")
-            self.announcementLabel.setPixmap(pixmap_res5)
-        if total == 7:
-            pixmap_res6 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/YOUR-TOTAL-IS-7-06-02-2025.png")
-            self.announcementLabel.setPixmap(pixmap_res6)
-        if total == 8:
-            pixmap_res7 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/YOUR-TOTAL-IS-8-06-02-2025.png")
-            self.announcementLabel.setPixmap(pixmap_res7)
-        if total == 9:
-            pixmap_res8 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/YOUR-TOTAL-IS-9-06-02-2025.png")
-            self.announcementLabel.setPixmap(pixmap_res8)
-        if total == 10:
-            pixmap_res9 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/YOUR-TOTAL-IS-10-2-6-2025.png")
-            self.announcementLabel.setPixmap(pixmap_res9)
-        if total == 11:
-            pixmap_res10 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/YOUR-TOTAL-IS-11-2-6-2025.png")
-            self.announcementLabel.setPixmap(pixmap_res10)
-        if total == 12:
-            pixmap_res11 = QPixmap("C:/Users/henry/OneDrive/Desktop/Software Engineering/YOUR-TOTAL-IS-12-2-6-2025.png")
-            self.announcementLabel.setPixmap(pixmap_res11)
+        self.announcementLabel.setPixmap(self.result_images[total - 2])
             
     def resetConor(self):
         self.conor.setStyleSheet("background: transparent; border: none;")
         
-        
-
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
