@@ -5,6 +5,7 @@ class space:
     name:str = "ERROR - invalid name"
     action:int = -1 ## -1 is no action, reference player script for all action indexes.
     is_property:bool = False
+    position:list[int]
 
     ## PROPERTY ONLY
     owner = None
@@ -20,6 +21,7 @@ class space:
         space_temp = SpaceDict.spaces[space]
         self.name = space_temp["name"]
         self.action = space_temp["action"]
+        self.position = SpaceDict.space_positions[self.space]
         
         self.is_property = space_temp["is property"]
         if not self.is_property: return
@@ -57,4 +59,3 @@ def load_spaces() -> list[space]:
         spaces.append(space(i))
     return spaces
 
-spaces = load_spaces

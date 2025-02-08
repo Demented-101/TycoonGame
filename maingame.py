@@ -20,9 +20,12 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QTimer as qtm
 
-#Importing other libraries to use throughout the program 
+import PlayerScript as plyr
+import Spaces as spce
 
-import random
+#Importing other libraries to use throughout the program
+
+import random as ran
 import sys
 import time
 
@@ -30,8 +33,12 @@ import time
 
 #Declaration of variables that require global scope (e.g. variables that may need to be used across multiple windows.)
 
+running:bool = False
 selectedPlayerNo = False
 noOfPlayers = 0
+
+players:list[plyr.player]
+spaces:list[spce.space]
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -41,6 +48,23 @@ def get_image_path(name:str) -> str: ## just pass in the name of the image (incl
     #callum you're the best 
     full_path:str = "IMG/" + name
     return full_path
+
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#THE function used for the gameplay loop (the holy grail)
+
+def run():
+        running:bool = True
+        
+        ## load the players and spaces
+        spaces = spce.load_spaces()
+        players = []
+        for i in range(noOfPlayers):
+            players.append(plyr.player(i))
+        
+        current_turn:int = 0
+        while running:
+            pass
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -87,10 +111,11 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.diceRollTest.clicked.connect(self.diceRollPressed)
         
   
-  
+        run()
         self.showFullScreen() #display main window
 
     def closebuttonpressed(self): #close main window
+        running = False
         self.close()
     
     def helpbuttonpressed(self):
@@ -161,7 +186,6 @@ class HelpWindow (qtw.QMainWindow):
             self.background_label.setFixedHeight(scaled_pixmap.height())
             
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-            
 
 class StartWindow(qtw.QMainWindow): #code for the start window in which the number of players is decided.
     
@@ -173,6 +197,10 @@ class StartWindow(qtw.QMainWindow): #code for the start window in which the numb
     as the size of each looked the same due to their same sized background image and transparency, but the 5 player button overlapped the 4 player button
     which overlapped the 3 player button etc. so every button you pressed would select the 5 player option. this was later discovered in testing and
     quickly amended
+    
+    (this is callum now): before, each button would run a seperate method, since each button would need to set the amount of players differently.
+    after researching this issue, lambda could be use to pass an argument into a function, meaning all 5 methods can be reduced to a single method
+    far more cleanly.
     
     '''
     
@@ -187,80 +215,45 @@ class StartWindow(qtw.QMainWindow): #code for the start window in which the numb
         self.players1.setIconSize(qtc.QSize(300, 200))
         self.players1.setGeometry(100, 150, 300, 90)  
         self.players1.setStyleSheet("QPushButton { background: transparent; border: none; }")
-        self.players1.clicked.connect(self.player1)
+        self.players1.clicked.connect(lambda: self.load_players(1))
 
         self.players2 = qtw.QPushButton("", self)
         self.players2.setIcon(qtg.QIcon(get_image_path("2players.png")))
         self.players2.setIconSize(qtc.QSize(300, 200))
         self.players2.setGeometry(100, 240, 300, 90)  
         self.players2.setStyleSheet("QPushButton { background: transparent; border: none; }")
-        self.players2.clicked.connect(self.player2)
+        self.players2.clicked.connect(lambda: self.load_players(2))
 
         self.players3 = qtw.QPushButton("", self)
         self.players3.setIcon(qtg.QIcon(get_image_path("3players.png")))
         self.players3.setIconSize(qtc.QSize(300, 200))
         self.players3.setGeometry(100, 330, 300, 90)  
         self.players3.setStyleSheet("QPushButton { background: transparent; border: none; }")
-        self.players3.clicked.connect(self.player3)
+        self.players3.clicked.connect(lambda: self.load_players(3))
 
         self.players4 = qtw.QPushButton("", self)
         self.players4.setIcon(qtg.QIcon(get_image_path("4players.png")))
         self.players4.setIconSize(qtc.QSize(300, 200))
         self.players4.setGeometry(100, 420, 300, 90)  
         self.players4.setStyleSheet("QPushButton { background: transparent; border: none; }")
-        self.players4.clicked.connect(self.player4)
+        self.players4.clicked.connect(lambda: self.load_players(4))
 
         self.players5 = qtw.QPushButton("", self)
         self.players5.setIcon(qtg.QIcon(get_image_path("5players.png")))
         self.players5.setIconSize(qtc.QSize(300, 200))
         self.players5.setGeometry(100, 510, 300, 90)  
         self.players5.setStyleSheet("QPushButton { background: transparent; border: none; }")
-        self.players5.clicked.connect(self.player5)
+        self.players5.clicked.connect(lambda: self.load_players(5))
 
         self.show()  # Show the window
-        
-    '''CALLUM. HERE LIES THE VARIABLE THAT CONTAINS THE NUMBER OF PLAYERS (noOfPlayers). IT IS GLOBAL, FEEL FREE TO USE THEM IN OTHER CLASSES.'''
-    def player1(self):
+    
+    ## henry you did NOT need 5 seperate methods for this shit lmfao
+    def load_players(self, count:int):
         selectedPlayerNo = True
-        if selectedPlayerNo == True:
-            self.openWindow1 = MainWindow()
-            self.close()
-            noOfPlayers = 1 #HERE!
-            print(noOfPlayers) #test
-
-    def player2(self):
-        selectedPlayerNo = True
-        if selectedPlayerNo == True:
-            self.openWindow2 = MainWindow()
-            self.close()
-            noOfPlayers = 2
-            print(noOfPlayers) #test
-
-    def player3(self):
-        selectedPlayerNo = True
-        if selectedPlayerNo == True:
-            self.openWindow3 = MainWindow()
-            self.close()
-            noOfPlayers = 3
-            print(noOfPlayers) #test
-
-    def player4(self):
-        selectedPlayerNo = True
-        if selectedPlayerNo == True:
-            self.openWindow4 = MainWindow()
-            self.close()
-            noOfPlayers = 4
-            print(noOfPlayers) #test
-
-    def player5(self):
-        selectedPlayerNo = True
-        if selectedPlayerNo == True:
-            self.openWindow5 = MainWindow()
-            self.close()
-            noOfPlayers = 5
-            print(noOfPlayers) #test
-            
-
+        self.openWindow1 = MainWindow()
+        self.close()
+        noOfPlayers - count
+        print(noOfPlayers)
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
      
@@ -347,10 +340,10 @@ class diceRoll(qtw.QMainWindow):
         
         self.diceRollButton.setDisabled(True) #immediately disable button so that it cannot be pressed again whilst the animation is still running.
         if self.animationCounter < 10: #repeat roll 10 times as part of the animation
-            randomface1 = random.randint(0,5)
+            randomface1 = ran.randint(0,5)
             self.dice1.setPixmap(self.dice_images[randomface1])
 
-            randomface2 = random.randint(0,5)
+            randomface2 = ran.randint(0,5)
             self.dice2.setPixmap(self.dice_images[randomface2])
             
             self.animationCounter += 1
@@ -363,9 +356,9 @@ class diceRoll(qtw.QMainWindow):
         
         self.animationCounter = 0 #reset the animation counter so that it can run again if a double is rolled.
         
-            
-        diceRoll1 = random.randint(1, 6) #conor, when testing for double rolls, you can change these values both to the same integer to force a double roll x
-        diceRoll2 = random.randint(1, 6)
+        
+        diceRoll1 = ran.randint(1, 6) #conor, when testing for double rolls, you can change these values both to the same integer to force a double roll x
+        diceRoll2 = ran.randint(1, 6)
         global total
         total = diceRoll1 + diceRoll2
         
@@ -400,7 +393,6 @@ class diceRoll(qtw.QMainWindow):
             
     def resetConor(self):
         self.conor.setStyleSheet("background: transparent; border: none;")
-        
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
