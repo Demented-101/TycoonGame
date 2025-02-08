@@ -1,7 +1,9 @@
 from __future__ import annotations
 import Spaces as space
+import SpacesDictionary as spceDict
 import random as ran
 import time
+from PyQt5.QtCore import QTimer as qtm
 
 ## PROMPTS NEEDED:
     # purchase property
@@ -19,10 +21,15 @@ class player:
     jail_turns:int = 0
     GOOJ_cards:list[bool] ## true is opp, false is pot
     
+    moving:bool = False
+    handling_action:bool = True
+    
     def __init__(self, index:int):
         player_num = index
     
-    def move(self) -> None:
+    def move(self, roll:int, main_window) -> None:
+        self.moving = True
+        
         if self.in_jail and False: ## TODO - reimplement jail
             if self.attempt_jail_leave():
                 self.in_jail = False
@@ -34,9 +41,16 @@ class player:
 
         self.position = (self.position + 1) % 40
         if self.position == 0: self.money += 200
+        main_window.move_player_icon(self.player_num, spceDict.space_positions[self.position])
+        
+        if roll > 0:
+            qtm.singleShot(300, lambda: self.move(roll - 1, main_window))
+        else:
+            self.moving = False
         ## move peice
     
-    def move_finished(self, space):
+    def finish_movement(self, space):
+        self.handling_action = True
         match space.action:
             case -1: pass ## no action
             case 0: self.pull_card_opp()
@@ -45,6 +59,8 @@ class player:
             case 3: self.pay_parking(200)
             case 4: self.pay_parking(100)
             case 5: self.go_to_jail()
+        self.handling_action = False
+        
                 
     def attempt_pay(self, amount:int) -> int:
         if amount > self.money: 

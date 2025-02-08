@@ -37,9 +37,11 @@ running:bool = False
 current_turn:int
 selectedPlayerNo = False
 noOfPlayers:int
+previous_roll:int
 
-players:list
-spaces:list
+players:list[plyr.player] = []
+spaces:list[spce.space] = []
+main_window:qtw.QMainWindow
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -55,34 +57,66 @@ def get_image_path(name:str, folder:str) -> str:
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+#main gameplay loop + other
+
 def start(player_count:int) -> None:
     print("START METHOD RUN")
+    global players, spaces, current_turn
     
-    players = []
+    current_turn = 0
+    
     for i in range(player_count): 
         players.append(plyr.player(i))
         print(i)
     
     spaces = spce.load_spaces()
+    qtm.singleShot(1000, loop) # wait until game loop starts
 
-def roll_complete(roll:int) -> None:
-    current_player = players[current_turn]
-    if not current_player.is_bankrupt:
-        for i in range(roll): 
-            current_player.move()
-            print(str(current_turn) + ": " + str(current_player.position))
-            time.sleep(0.1)
+loop_state:int = 0
+prev_loop_state:int = -1
+def loop() -> None:
+    global loop_state, prev_loop_state
+    
+    new_state:bool = loop_state != prev_loop_state
+    prev_loop_state = loop_state
+    
+    if loop_state == 0 and new_state: ## roll dice (state 0)
+        print("dice roll started")
+        main_window.promptDiceRoll()
+    
+    if loop_state == 1: ## roll finished - move player (state 1)
+        global players, current_turn
+        current_player = players[current_turn]
         
-        print(str(current_turn) + " ends at: " + str(current_player.position))
-        current_player.move_finished(spaces[current_player.position])
+        if new_state: ## dice roll just finished
+            global previous_roll
+            print("dice roll finished - moving player")
+            current_player.move(previous_roll)
         
-        ## TODO - prompt purchase
-        ## TODO - prompt upgrade selection
+        if not current_player.moving: ## finished moving
+            global spaces
+            print("player finished moving")
+            current_player.finish_movement(spaces[current_player.position])
+        
+        
+    
+    if loop_state == -1: ## turn finished
+        global current_turn
+        current_turn += 1
+        loop_state = 0
+    
+    qtm.singleShot(500, loop)
+
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
+    
+    player_icons:list = []
+    
     def __init__(self):
+        global main_window
+        main_window = self
         
         super().__init__()
         self.setWindowTitle("Property Tycoon") #Title of Window
@@ -98,12 +132,9 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.closebutton.setToolTip("Close Game")
         self.closebutton.clicked.connect(self.closebuttonpressed) #call to function when close button is pressed
         
-        self.bootIcon = qtw.QLabel(self)
-        bootpixmap = qtg.QPixmap(get_image_path("Bootresized1.png", "PItems"))
-        self.bootIcon.setPixmap(bootpixmap)
-        self.bootIcon.setScaledContents(True)
-        self.bootIcon.setGeometry(1400,960,100,100)
-        print(get_image_path("Bootresizede1.png", "PItems")) # you can rest now child - for the nightmare is over <3
+        global noOfPlayers
+        for i in range(noOfPlayers):
+            self.create_player_icon("Bootresized1.png")
   
         self.helpbutton = qtw.QPushButton("", self) # code to set up help button properties
         self.helpbutton.setIcon(qtg.QIcon(get_image_path("helpbutton.png", "Help")))
@@ -126,6 +157,14 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         
         self.showFullScreen() #display main window
 
+    def create_player_icon(self, image:str):
+        new_icon = qtw.QLabel(self)
+        new_icon.setPixmap(qtg.QPixmap(get_image_path(image, "PItems")))
+        new_icon.setScaledContents(True)
+        new_icon.setStyleSheet("QPushButton { background: transparent; border: none; }")
+        new_icon.setGeometry(1400,960,100,100)
+        self.player_icons.append(new_icon)
+    
     def closebuttonpressed(self): #close main window
         running = False
         self.close()
@@ -142,6 +181,10 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.dice_roll_open = diceRoll()
         self.dice_roll_open.show()
   
+    def move_player_icon(self, player, position):
+        icon = self.player_icons[player]
+        icon.setGeometry(position[0] + 50, position[1] + 50, 100, 100)
+        
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
 
 class HelpWindow (qtw.QMainWindow): 
@@ -265,12 +308,14 @@ class StartWindow(qtw.QMainWindow): #code for the start window in which the numb
     
     ## henry you did NOT need 5 seperate methods for this shit lmfao
     def load_players(self, count:int):
+        global selectedPlayerNo, noOfPlayers
         selectedPlayerNo = True
         noOfPlayers = count
-        start(count)
         self.openWindow1 = MainWindow()
         self.openWindow1.promptDiceRoll()
         self.close()
+        
+        start(count)
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
      
@@ -367,12 +412,13 @@ class diceRoll(qtw.QMainWindow):
             self.diceRollMethod()
     
     def diceRollMethod(self):
+        global previous_roll, loop_state
         self.animationCounter = 0 #reset the animation counter so that it can run again if a double is rolled.
         
         diceRoll1 = ran.randint(1, 6) #conor, when testing for double rolls, you can change these values both to the same integer to force a double roll x
         diceRoll2 = ran.randint(1, 6)
-        global total
         total = diceRoll1 + diceRoll2
+        previous_roll = total
         
         if diceRoll1 == 4 and diceRoll2 == 3: #ignore this 
             self.conor.setStyleSheet("background-image: url("+ get_image_path("Snapchat-675243558.jpg", "Other") +"); background-repeat: no-repeat; background-position: center;")
@@ -400,7 +446,10 @@ class diceRoll(qtw.QMainWindow):
         
         time.sleep(0.2)
         self.announcementLabel.setPixmap(self.result_images[total - 2])
-        roll_complete(total)
+        time.sleep(0.5)
+        self.hide()
+        loop_state = 1
+        
             
     def resetConor(self):
         self.conor.setStyleSheet("background: transparent; border: none;")
