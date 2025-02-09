@@ -25,9 +25,10 @@ class player:
     handling_action:bool = True
     
     def __init__(self, index:int):
-        player_num = index
+        self.player_num = index
     
     def move(self, roll:int, main_window) -> None:
+        print("move: " + str(roll) + " player index: " + str(self.player_num))
         self.moving = True
         
         if self.in_jail and False: ## TODO - reimplement jail
@@ -43,7 +44,7 @@ class player:
         if self.position == 0: self.money += 200
         main_window.move_player_icon(self.player_num, spceDict.space_positions[self.position])
         
-        if roll > 0:
+        if roll > 1:
             qtm.singleShot(300, lambda: self.move(roll - 1, main_window))
         else:
             self.moving = False

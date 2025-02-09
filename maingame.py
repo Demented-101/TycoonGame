@@ -75,34 +75,30 @@ def start(player_count:int) -> None:
 loop_state:int = 0
 prev_loop_state:int = -1
 def loop() -> None:
-    global loop_state, prev_loop_state
+    global loop_state, prev_loop_state, current_turn, main_window
+    global players, spaces, previous_roll
     
     new_state:bool = loop_state != prev_loop_state
     prev_loop_state = loop_state
     
     if loop_state == 0 and new_state: ## roll dice (state 0)
         print("dice roll started")
-        main_window.promptDiceRoll()
+        main_window.promptDiceRoll(current_turn + 1)
     
     if loop_state == 1: ## roll finished - move player (state 1)
-        global players, current_turn
         current_player = players[current_turn]
         
         if new_state: ## dice roll just finished
-            global previous_roll
             print("dice roll finished - moving player")
-            current_player.move(previous_roll)
+            current_player.move(previous_roll, main_window)
         
         if not current_player.moving: ## finished moving
-            global spaces
             print("player finished moving")
             current_player.finish_movement(spaces[current_player.position])
+            loop_state = -1
         
-        
-    
-    if loop_state == -1: ## turn finished
-        global current_turn
-        current_turn += 1
+    elif loop_state == -1: ## turn finished]
+        current_turn = (current_turn + 1) % noOfPlayers
         loop_state = 0
     
     qtm.singleShot(500, loop)
@@ -162,7 +158,7 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         new_icon.setPixmap(qtg.QPixmap(get_image_path(image, "PItems")))
         new_icon.setScaledContents(True)
         new_icon.setStyleSheet("QPushButton { background: transparent; border: none; }")
-        new_icon.setGeometry(1400,960,100,100)
+        new_icon.setGeometry(1350,910,100,100)
         self.player_icons.append(new_icon)
     
     def closebuttonpressed(self): #close main window
@@ -174,16 +170,16 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.help_window_open.show()
         
     def diceRollPressed(self):
-        self.dice_roll_open = diceRoll()
+        self.dice_roll_open = diceRoll("Dice Roll")
         self.dice_roll_open.show()
     
-    def promptDiceRoll(self):
-        self.dice_roll_open = diceRoll()
+    def promptDiceRoll(self, player:int):
+        self.dice_roll_open = diceRoll("Player " + str(player) + "'s turn!")
         self.dice_roll_open.show()
   
     def move_player_icon(self, player, position):
         icon = self.player_icons[player]
-        icon.setGeometry(position[0] + 50, position[1] + 50, 100, 100)
+        icon.setGeometry(position[0] - 50, position[1] - 50, 100, 100)
         
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
 
@@ -312,7 +308,6 @@ class StartWindow(qtw.QMainWindow): #code for the start window in which the numb
         selectedPlayerNo = True
         noOfPlayers = count
         self.openWindow1 = MainWindow()
-        self.openWindow1.promptDiceRoll()
         self.close()
         
         start(count)
@@ -338,9 +333,10 @@ class diceRoll(qtw.QMainWindow):
     - etc, etc
     
     '''
-    def __init__(self):
+    
+    def __init__(self, title:str):
         super().__init__()
-        self.setWindowTitle("Dice Roll")
+        self.setWindowTitle(title)
         self.resize(617,360)
         self.setStyleSheet("background-image: url('"+ get_image_path("bluebackground.jpg", "Dice") +"'); background-repeat: no-repeat;")
         
@@ -393,7 +389,7 @@ class diceRoll(qtw.QMainWindow):
         
         self.show()
     
-    def rollAnimation(self): 
+    def rollAnimation(self):
         self.announcementLabel.setPixmap(qtg.QPixmap()) 
         self.DoubleRollLabel.setStyleSheet("background: transparent; border: none;")
         self.goToJailLabel.setStyleSheet("background: transparent; border: none;")
@@ -419,6 +415,9 @@ class diceRoll(qtw.QMainWindow):
         diceRoll2 = ran.randint(1, 6)
         total = diceRoll1 + diceRoll2
         previous_roll = total
+        print("Dice 1: " + str(diceRoll1))
+        print("Dice 2: " + str(diceRoll2))
+        print("roll: " + str(total))
         
         if diceRoll1 == 4 and diceRoll2 == 3: #ignore this 
             self.conor.setStyleSheet("background-image: url("+ get_image_path("Snapchat-675243558.jpg", "Other") +"); background-repeat: no-repeat; background-position: center;")
@@ -443,14 +442,14 @@ class diceRoll(qtw.QMainWindow):
         self.dice2.setPixmap(self.dice_images[diceRoll2 - 1])
         
         #CHANGING THE OUTPUT OF OUR ANNOUNCEMENT LABEL BASED OFF OF WHAT OUR TOTAL IS:
-        
-        time.sleep(0.2)
         self.announcementLabel.setPixmap(self.result_images[total - 2])
-        time.sleep(0.5)
+        qtm.singleShot(1000, self.end_roll)
+
+    def end_roll(self) -> None:
+        global loop_state
         self.hide()
         loop_state = 1
-        
-            
+             
     def resetConor(self):
         self.conor.setStyleSheet("background: transparent; border: none;")
 
