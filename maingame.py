@@ -186,7 +186,7 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         new_icon = qtw.QLabel(self)
         new_icon.setPixmap(qtg.QPixmap(get_image_path(image, "PItems")))
         new_icon.setScaledContents(True)
-        new_icon.setStyleSheet("QPushButton { background: transparent; border: none; }")
+        new_icon.setStyleSheet("background: transparent; border: none; ")
         new_icon.setGeometry(1350,910,100,100)
         self.player_icons.append(new_icon)
     
