@@ -34,10 +34,13 @@ import time
 #Declaration of variables that require global scope (e.g. variables that may need to be used across multiple windows.)
 
 running:bool = False
-current_turn:int
+current_turn:int = 0
 selectedPlayerNo = False
-noOfPlayers:int
-previous_roll:int
+noOfPlayers:int = -1
+
+previous_roll:int = 0
+previous_roll_was_double:bool = False
+double_count:int = 0
 
 players:list[plyr.player] = []
 spaces:list[spce.space] = []
@@ -75,8 +78,9 @@ def start(player_count:int) -> None:
 loop_state:int = 0
 prev_loop_state:int = -1
 def loop() -> None:
-    global loop_state, prev_loop_state, current_turn, main_window
-    global players, spaces, previous_roll
+    global loop_state, prev_loop_state, current_turn
+    global players, spaces, main_window
+    global previous_roll, previous_roll_was_double, double_count
     
     new_state:bool = loop_state != prev_loop_state
     prev_loop_state = loop_state
@@ -90,12 +94,21 @@ def loop() -> None:
         
         if new_state: ## dice roll just finished
             print("dice roll finished - moving player")
-            current_player.move(previous_roll, main_window)
+            if previous_roll_was_double and double_count == 1:
+                current_player.go_to_jail()
+                loop_state = -1
+            else:
+                current_player.move(previous_roll, main_window)
         
         if not current_player.moving: ## finished moving
             print("player finished moving")
             current_player.finish_movement(spaces[current_player.position])
-            loop_state = -1
+            if previous_roll_was_double:
+                loop_state = 0 ## player reroll
+                double_count += 1
+            else:
+                loop_state = -1
+                double_count = 0
         
     elif loop_state == -1: ## turn finished]
         current_turn = (current_turn + 1) % noOfPlayers
@@ -317,7 +330,7 @@ class StartWindow(qtw.QMainWindow): #code for the start window in which the numb
 class diceRoll(qtw.QMainWindow):
     
     dice_images:list = []
-    result_images:list = []
+    result_images:dict = {}
     
     '''
     NOTES FOR CONOR
@@ -342,7 +355,7 @@ class diceRoll(qtw.QMainWindow):
         
         ## load images for dice and totals - saves loading this millions of times over later
         for i in range(1,7):self.dice_images.append(QPixmap(get_image_path("dice-" + str(i) + ".png", "Dice")))
-        for i in range(2,13): self.result_images.append(QPixmap(get_image_path("Total-" + str(i) + ".png", "Dice")))
+        for i in range(2,13): self.result_images[i] = (QPixmap(get_image_path("Total-" + str(i) + ".png", "Dice")))
         
         self.diceRollButton = QPushButton("", self) #setting up properties of dice roll button 
         self.diceRollButton.setGeometry(158, 200, 300, 200)
@@ -379,6 +392,9 @@ class diceRoll(qtw.QMainWindow):
         self.goToJailLabel.setStyleSheet("background: transparent; border: none;")
         self.goToJailLabel.setScaledContents(True)
         
+        global double_count
+        self.set_double(double_count)
+        
         self.conor = qtw.QLabel(self) #ignore this...
         self.conor.setGeometry(50,0,200,400)
         self.conor.setStyleSheet("background: transparent; border: none;")
@@ -388,6 +404,14 @@ class diceRoll(qtw.QMainWindow):
         self.animationCounter = 0
         
         self.show()
+    
+    def set_double(self, count:int) -> None:
+            if count == 0: ## no changes needed
+                return
+            elif count == 1: ## single double roll
+                self.DoubleRollLabel.setStyleSheet("background-image: url('"+ get_image_path("DoubleRoll.png", "Dice") + "'); background-repeat: no-repeat; background-position: center;")
+            else: ## second double roll - next go to jail
+                self.goToJailLabel.setStyleSheet("background-image: url('"+ get_image_path("JailDoubleRoll.png", "Dice") +"'); background-repeat: no-repeat; background-position: center;")
     
     def rollAnimation(self):
         self.announcementLabel.setPixmap(qtg.QPixmap()) 
@@ -408,13 +432,15 @@ class diceRoll(qtw.QMainWindow):
             self.diceRollMethod()
     
     def diceRollMethod(self):
-        global previous_roll, loop_state
+        global previous_roll, previous_roll_was_double, loop_state
         self.animationCounter = 0 #reset the animation counter so that it can run again if a double is rolled.
+        self.diceRollButton.setDisabled(True) #disable button
         
         diceRoll1 = ran.randint(1, 6) #conor, when testing for double rolls, you can change these values both to the same integer to force a double roll x
         diceRoll2 = ran.randint(1, 6)
         total = diceRoll1 + diceRoll2
         previous_roll = total
+        
         print("Dice 1: " + str(diceRoll1))
         print("Dice 2: " + str(diceRoll2))
         print("roll: " + str(total))
@@ -423,26 +449,15 @@ class diceRoll(qtw.QMainWindow):
             self.conor.setStyleSheet("background-image: url("+ get_image_path("Snapchat-675243558.jpg", "Other") +"); background-repeat: no-repeat; background-position: center;")
             qtm.singleShot(500, self.resetConor)
         
-        if diceRoll1 == diceRoll2 and False: #if a double is rolled.... !! CURRENTLY DISABLED
-            self.diceRollButton.setDisabled(False) #restore buttons functionality to allow player to roll again
-            self.noOfRolls = self.noOfRolls + 1 #increment roll counter
-            if self.noOfRolls >= 2: #if another double is rolled...
-                self.goToJailLabel.setStyleSheet("background-image: url('"+ get_image_path("ANOTHER-DOUBLE-GO-TO-JAIL-07-02-2025.png", "Dice") +"'); background-repeat: no-repeat; background-position: center;")
-                self.diceRollButton.setDisabled(True) #user can only press dice roll button once
-                #CALUM, SEND TO JAIL FUNCTION HERE!
-            else:
-                self.DoubleRollLabel.setStyleSheet("background-image: url('"+ get_image_path("DOUBLE-ROLL-ROLL-AGAIN-07-02-2025.png", "Dice") + "'); background-repeat: no-repeat; background-position: center;")
-        else:
-            self.diceRollButton.setDisabled(True)
-                
-            
+        previous_roll_was_double = diceRoll1 == diceRoll2 ## save double roll
+
         #CHANGING THE DICE ICONS BASED ON WHICH NUMBERS HAVE BEEN RANDOMLY SELECTED: (but BETTER!)
 
         self.dice1.setPixmap(self.dice_images[diceRoll1 - 1])
         self.dice2.setPixmap(self.dice_images[diceRoll2 - 1])
         
         #CHANGING THE OUTPUT OF OUR ANNOUNCEMENT LABEL BASED OFF OF WHAT OUR TOTAL IS:
-        self.announcementLabel.setPixmap(self.result_images[total - 2])
+        self.announcementLabel.setPixmap(self.result_images[total])
         qtm.singleShot(1000, self.end_roll)
 
     def end_roll(self) -> None:

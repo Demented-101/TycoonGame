@@ -24,10 +24,13 @@ class player:
     moving:bool = False
     handling_action:bool = True
     
+    main_window = None
+    
     def __init__(self, index:int):
         self.player_num = index
     
     def move(self, roll:int, main_window) -> None:
+        self.main_window = main_window
         print("move: " + str(roll) + " player index: " + str(self.player_num))
         self.moving = True
         
@@ -62,7 +65,6 @@ class player:
             case 5: self.go_to_jail()
         self.handling_action = False
         
-                
     def attempt_pay(self, amount:int) -> int:
         if amount > self.money: 
             self.is_bankrupt = True
@@ -85,7 +87,7 @@ class player:
     def go_to_jail(self) -> None:
         self.in_jail = True
         self.jail_turns = 0
-        ## move peice to jail
+        self.main_window.move_player_icon(self.player_num, spceDict.jail_position)
     
     def attempt_jail_leave(self) -> bool:
         if self.jail_turns == 3:
