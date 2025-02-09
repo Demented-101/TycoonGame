@@ -19,7 +19,7 @@ class player:
     
     in_jail:bool = False
     jail_turns:int = 0
-    GOOJ_cards:list[bool] ## true is opp, false is pot
+    GOOJ_cards:list[bool] = [] ## true is opp, false is pot
     
     moving:bool = False
     handling_action:bool = True
@@ -87,17 +87,20 @@ class player:
     def go_to_jail(self) -> None:
         self.in_jail = True
         self.jail_turns = 0
+        self.position = 10
         self.main_window.move_player_icon(self.player_num, spceDict.jail_position)
     
-    def attempt_jail_leave(self) -> bool:
-        if self.jail_turns == 3:
+    def attempt_jail_leave(self, rolled_double:bool) -> bool:
+        if self.jail_turns == 3 or rolled_double:
             return True
         
-        if self.attempt_pay(50):
+        if False:#disabled until prompt is ready
             return True ## TODO - prompt choice for this
         
         if len(self.GOOJ_cards) > 0:
             card = self.GOOJ_cards.pop()
+            ## TODO - add back to respective pack
             return True
 
         self.jail_turns += 1
+        return False

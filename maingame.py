@@ -92,12 +92,27 @@ def loop() -> None:
     if loop_state == 1: ## roll finished - move player (state 1)
         current_player = players[current_turn]
         
-        if new_state: ## dice roll just finished
-            print("dice roll finished - moving player")
+        if new_state: ## dice roll just finished 
+            allow_move:bool = True
+            
+            if current_player.in_jail: ## in jail
+                escaped = current_player.attempt_jail_leave(previous_roll_was_double)
+                if escaped:
+                    current_player.in_jail = False
+                    current_player.position = 10
+                    allow_move = True
+                else:
+                    loop_state = -1
+                    allow_move = False
+            
             if previous_roll_was_double and double_count == 1:
                 current_player.go_to_jail()
                 loop_state = -1
-            else:
+                allow_move = False
+                previous_roll_was_double = False
+                
+            if allow_move: 
+                print("dice roll finished - moving player") 
                 current_player.move(previous_roll, main_window)
         
         if not current_player.moving: ## finished moving
@@ -106,6 +121,7 @@ def loop() -> None:
             if previous_roll_was_double:
                 loop_state = 0 ## player reroll
                 double_count += 1
+                print(double_count)
             else:
                 loop_state = -1
                 double_count = 0
