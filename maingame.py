@@ -187,12 +187,13 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         new_icon.setPixmap(qtg.QPixmap(get_image_path(image, "PItems")))
         new_icon.setScaledContents(True)
         new_icon.setStyleSheet("background: transparent; border: none; ")
-        new_icon.setGeometry(1350,910,100,100)
+        new_icon.setGeometry(1350,910,120,120)
         self.player_icons.append(new_icon)
     
     def closebuttonpressed(self): #close main window
         running = False
-        self.close()
+        qtw.QApplication.instance().quit() #closes application
+
     
     def helpbuttonpressed(self):
         self.help_window_open = HelpWindow() #opens up the help window
