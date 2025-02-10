@@ -331,8 +331,7 @@ class StartWindow(qtw.QMainWindow): #code for the start window in which the numb
         self.players5.clicked.connect(lambda: self.load_players(5))
 
         self.show()  # Show the window
-    
-    ## henry you did NOT need 5 seperate methods for this shit lmfao
+
     def load_players(self, count:int):
         global selectedPlayerNo, noOfPlayers
         selectedPlayerNo = True
