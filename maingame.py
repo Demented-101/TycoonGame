@@ -368,6 +368,7 @@ class diceRoll(qtw.QMainWindow):
         self.setWindowTitle(title)
         self.resize(617,360)
         self.setStyleSheet("background-image: url('"+ get_image_path("bluebackground.jpg", "Dice") +"'); background-repeat: no-repeat;")
+        self.setWindowFlags(qtc.Qt.WindowStaysOnTopHint)
         
         ## load images for dice and totals - saves loading this millions of times over later
         for i in range(1,7):self.dice_images.append(QPixmap(get_image_path("dice-" + str(i) + ".png", "Dice")))
