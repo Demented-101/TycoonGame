@@ -491,9 +491,9 @@ class PropertyWindow(qtw.QMainWindow):
     def __init__(self,):
         super().__init__()
         self.setWindowTitle("TEMP")
-        self.resize(626,352)
+        self.resize(926,652)
         self.show()
-        self.setStyleSheet("background-image: url('"+ get_image_path("1746.jpg", "Board") +"'); background-repeat: no-repeat;")
+        self.setStyleSheet("background-image: url('"+ get_image_path("1746.jpg", "Board") +"'); background-repeat: no-repeat; background-position: center;")
         
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
