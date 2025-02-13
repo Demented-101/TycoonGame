@@ -194,7 +194,6 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         running = False
         qtw.QApplication.instance().quit() #closes application
 
-    
     def helpbuttonpressed(self):
         self.help_window_open = HelpWindow() #opens up the help window
         self.help_window_open.show()
@@ -209,7 +208,7 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
   
     def move_player_icon(self, player, position):
         icon = self.player_icons[player]
-        icon.setGeometry(position[0] - 50, position[1] - 50, 100, 100)
+        icon.setGeometry(position[0] - 60, position[1] - 60, 120, 120)
         
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
 
