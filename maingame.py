@@ -194,6 +194,7 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         running = False
         qtw.QApplication.instance().quit() #closes application
 
+    
     def helpbuttonpressed(self):
         self.help_window_open = HelpWindow() #opens up the help window
         self.help_window_open.show()
@@ -208,7 +209,7 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
   
     def move_player_icon(self, player, position):
         icon = self.player_icons[player]
-        icon.setGeometry(position[0] - 60, position[1] - 60, 120, 120)
+        icon.setGeometry(position[0] - 50, position[1] - 50, 100, 100)
         
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
 
@@ -492,7 +493,8 @@ class PropertyWindow(qtw.QMainWindow):
         self.setWindowTitle("TEMP")
         self.resize(626,352)
         self.show()
-
+        self.setStyleSheet("background-image: url('"+ get_image_path("1746.jpg", "Board") +"'); background-repeat: no-repeat;")
+        
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app = qtw.QApplication([])
