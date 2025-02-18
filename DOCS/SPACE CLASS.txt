@@ -1,0 +1,42 @@
+SPACE CLASS
+
+space_index:int ## the spaces position on the board
+name:String
+description:String
+action:int ## -1 is no action, reference player script for all action indexes.
+
+## PROPERTY ONLY
+is_property:bool
+owner:Player = null
+cost:int
+house_cost:int
+group:int ## 0 is startion, 1 is brown etc so 9 is deep blue.
+level:int = 0 # house count, 0 is no houses, 1 is one etc, so 5 is hotel
+unleveled_rent:int ## singular rent - no full set
+rent:Array[int] ## each price per house, only use when full set is owned
+
+func _init_(space:int) -> void:
+	space_index = space
+	name = spaces[space].name ## do this for desc, action, etc
+	
+	if is_property:
+		cost = spaces[cost] ## do this for group, price etc
+	
+
+func get_price() -> int:
+	amount_in_group:int ## get amount in same set
+	for i in owner.properties:
+		if i.group == group: amount_in_group += 1
+	
+	if group == 0: ## station
+		return [25, 50, 100, 200][amount_in_group]
+	
+	elif (group == 1 or group == 9) and amount_in_group == 2: ## full 2 peice set
+		return rent[level]
+	
+	elif amount_in_group == 3: ## full 3 peice set
+		return rent[level]
+	
+	else: ## not full set
+		return unleveled_rent
+		

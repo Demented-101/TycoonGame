@@ -1,0 +1,49 @@
+Game Breif(er)
+
+Key:
+un-implemented: -
+untested: /-
+tested, complete: //-
+
+KEY ELEMENTS:
+- automated player (see player)
+- data initialization (spaces and card stacks) - must use external files!
+- good monitoring (current player worth, who has each property etc) available ingame
+- good testing capabilities
+
+Game:
+- 1 -> 5 human players, at least 1 automated player min.
+- bank starts with 50,000 (NOT NEEDED!)
+- players CANNOT lend each other money
+/- all properties start at the bank (unowned)
+- any fines paid (ie super tax or card fines) are paid into free parking.
+- two versions - full or abridged (timer)
+
+players:
+//- start with 1,500 money
+//- each turn, roll two dice (MUST BE FAIR 6 DICE). a double means a second go. a second means go to jail.
+/- take 200 when pass go
+- players must make one full circuit of the board before they can purchase anything
+- allowed to purchase a property they land on
+- if they don't purchase this, a bid will start
+- if they land on a property that is owned by another player, they must pay the owner whats due (as instructed on the card)
+- if the player cannot make a purchase, they must sell their own properties to try and make enough. if not, they go bankrupt and leave the board.
+/- when landing on free parking, the player takes everything in that space.
+
+properties:
+- if the player owns a full suit, the player can make upgrades (add houses) at the end of their turn
+- houses can be sold back to the bank for more money if needed
+- max development of one hotel
+- properties can be mortgaged for half the price. while mortgaged, rent cannot be collected on this property
+- if a mortgaged property is sold back to the bank, only half the price is given.
+
+Cards:
+- either Opportunity knocks or Pot luck
+- the cards instruction must be carried out immediately and placed at the bottom of the respective deck (unless they are GOOJ)
+
+Jail:
+/- never pass go when sent here
+- 50 money or a GOOJ card for bail
+- GOOJ cards are added to the bottom of the stack when used
+/- 3 rounds in jail
+/- player moves to just visiting when out of jail.

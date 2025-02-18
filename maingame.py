@@ -331,8 +331,7 @@ class StartWindow(qtw.QMainWindow): #code for the start window in which the numb
         self.players5.clicked.connect(lambda: self.load_players(5))
 
         self.show()  # Show the window
-    
-    ## henry you did NOT need 5 seperate methods for this shit lmfao
+
     def load_players(self, count:int):
         global selectedPlayerNo, noOfPlayers
         selectedPlayerNo = True
@@ -454,8 +453,8 @@ class diceRoll(qtw.QMainWindow):
         self.animationCounter = 0 #reset the animation counter so that it can run again if a double is rolled.
         self.diceRollButton.setDisabled(True) #disable button
         
-        diceRoll1 = ran.randint(1, 6) #conor, when testing for double rolls, you can change these values both to the same integer to force a double roll x
-        diceRoll2 = ran.randint(1, 6)
+        diceRoll1 = ran.randint(1,6) #conor, when testing for double rolls, you can change these values both to the same integer to force a double roll x
+        diceRoll2 = ran.randint(1,6)
         total = diceRoll1 + diceRoll2
         previous_roll = total
         
@@ -488,8 +487,18 @@ class diceRoll(qtw.QMainWindow):
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+class PropertyWindow(qtw.QMainWindow):
+    def __init__(self,):
+        super().__init__()
+        self.setWindowTitle("TEMP")
+        self.resize(926,652)
+        self.show()
+        self.setStyleSheet("background-image: url('"+ get_image_path("1746.jpg", "Board") +"'); background-repeat: no-repeat; background-position: center;")
+        
+#-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 app = qtw.QApplication([])
-mw = StartWindow()
+mw = PropertyWindow()
 '''CONOR. WHEN TESTING, CHANGE THE VALUE OF 'mw' TO THE NAME OF THE UI CLASS YOU WANT TO TEST. THIS WILL MAKE IT DISPLAY. love you'''
 
 app.exec_()

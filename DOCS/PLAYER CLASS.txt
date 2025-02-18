@@ -1,0 +1,76 @@
+PLAYER CLASS
+
+player_index:int ## ordered by turn order
+position:int ## the current space the player is on
+automated:boolean ## when true, decisions are made automatically
+
+money:int = 1500
+GOOJ_cards:Array[bool] ## true is opp, false is pot
+in_jail:bool = false
+jail_turns:int = 0
+owned_properties:Array[int] = []
+
+func roll() -> void:
+	handle_jail()
+	if in_jail:return
+	
+	roll = random_int(2,12)
+	for move in roll:
+		position = (position + 1) % 40
+		if position == 0: money += 200
+		move_peice()
+		wait(0.3)
+	
+	space = spaces[position]
+	if space.is_property:
+		if space.owner != -1:
+			owner = space.owner
+			price = space.get_price()
+			pay_player(owner, price)
+		else:
+			run_purchase_sequence()
+
+	match space.action:
+		-1: pass ## no action
+		0: pull_card_opp() ## oppotunity knocks
+		1: pull_card_pot() ## pot luck
+		3: take_parking() ## free parking
+		4: pay_parking(200) ## fine 200
+		5: pay_parking(100) ## fine 100
+		6: ## to jail
+	
+	prompt_upgrade_selection()
+
+func go_to_jail() -> void:
+	in_jail = true
+	jail_turns = 0
+	move_peice() ## this should check if the player is in jail and will move accordinly
+
+func handle_jail() -> void:
+	if !in_jail: return ## no need if in jail
+	
+	if GOOJ_cards.count() > 0: ##  has get out of jail free card
+		position = 20 ## move to just visiting (i think?)
+		GOOJ_count -= 1
+		move_peice()
+	
+	else:
+	
+	jail_turns += 1
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+	
