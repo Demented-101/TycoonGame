@@ -159,7 +159,7 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         
         global noOfPlayers
         for i in range(noOfPlayers):
-            self.create_player_icon("Bootresized1.png")
+            self.create_player_icon("Boot.png")
   
         self.helpbutton = qtw.QPushButton("", self) # code to set up help button properties
         self.helpbutton.setIcon(qtg.QIcon(get_image_path("helpbutton.png", "Help")))
