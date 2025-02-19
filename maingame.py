@@ -490,11 +490,23 @@ class diceRoll(qtw.QMainWindow):
 class PropertyWindow(qtw.QMainWindow):
     def __init__(self,):
         super().__init__()
-        self.setWindowTitle("TEMP")
+        self.setWindowTitle("Buy Properties?")
         self.resize(926,652)
-        self.show()
-        self.setStyleSheet("background-image: url('"+ get_image_path("1746.jpg", "Board") +"'); background-repeat: no-repeat; background-position: center;")
+        self.setStyleSheet("background-image: url('"+ get_image_path("TempBackground", "Property_Buy") +"'); background-repeat: repeat;")
         
+        self.propertyYes = qtw.QPushButton("",self)
+        self.propertyYes.setIcon(qtg.QIcon(get_image_path("Yes.png", "Property_Buy")))
+        self.propertyYes.setIconSize(qtc.QSize(150,300)) 
+        self.propertyYes.setGeometry(100,150,300,90)
+        self.propertyYes.setStyleSheet("QPushButton {background: transparent; border: none;}")
+
+
+        self.propertyNo = qtw.QPushButton("",self)
+        self.propertyNo.setIcon(qtg.QIcon(get_image_path("No.png", "Property_Buy")))
+        self.propertyNo.setIconSize(qtc.QSize(130,300)) 
+        self.propertyNo.setGeometry(300,150,700,90)
+        self.propertyNo.setStyleSheet("QPushButton {background: transparent; border: none;}")
+        self.show()
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app = qtw.QApplication([])
