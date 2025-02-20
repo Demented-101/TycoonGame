@@ -32,7 +32,6 @@ class player:
     
     def move(self, roll:int, main_window) -> None:
         self.main_window = main_window
-        print("move: " + str(roll) + " player index: " + str(self.player_num))
         self.moving = True
 
         self.position = (self.position + 1) % 40

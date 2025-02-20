@@ -71,7 +71,6 @@ def start(player_count:int) -> None:
     
     for i in range(player_count): 
         players.append(plyr.player(i))
-        print(i)
     
     spaces = spce.load_spaces()
     qtm.singleShot(1000, loop) # wait until game loop starts
@@ -88,9 +87,12 @@ def loop() -> None:
     current_player = players[current_turn]
     
     if loop_state == 0 and new_state: ## roll dice (state 0)
-        print("dice roll started")
-        main_window.promptDiceRoll(current_turn + 1)
-        current_player.handling_action = True
+        if current_player.is_bankrupt: ## skip go
+            loop_state = -1
+        else:
+            print("dice roll started")  
+            main_window.promptDiceRoll(current_turn + 1)
+            current_player.handling_action = True
     
     if loop_state == 1: ## roll finished - move player (state 1)
         if new_state: ## dice roll just finished 
@@ -133,13 +135,16 @@ def loop() -> None:
                 double_count = 0
         
     elif loop_state == -1: ## turn finished
-        current_turn = (current_turn + 1) % noOfPlayers
+        found_player:bool = False
+        while not found_player:
+            current_turn = (current_turn + 1) % noOfPlayers
+            found_player = not players[current_turn].is_bankrupt 
         loop_state = 0
     
     qtm.singleShot(500, loop)
 
 def player_movement_finished(player:plyr.player, space:spce.space) -> None:
-    print(player.properties)
+    print("current properties:" + str(player.properties))
     if space.is_property:
         if space.owner:
             player.pay_player(space.owner, space.get_price()) # pay owner if owned
@@ -161,11 +166,9 @@ def player_movement_finished(player:plyr.player, space:spce.space) -> None:
                 player.money += free_parking_pot
                 free_parking_pot = 0
             case 3: ## pay 200 fine to FP
-                player.money -= 200
-                free_parking_pot += 200
+                free_parking_pot += player.attempt_pay(200)
             case 4: ## pay 100 fine to FP
-                player.money -= 100
-                free_parking_pot += 100
+                free_parking_pot += player.attempt_pay(100)
             
             case 5:  ## go to jail
                 player.go_to_jail()
