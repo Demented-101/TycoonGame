@@ -14,6 +14,7 @@ class player:
     player_num:int = 0
     is_bankrupt:bool = False
     position:int = 0
+    passed_go:bool = False
     money:int = 1500
     properties:list = []
     
@@ -33,37 +34,19 @@ class player:
         self.main_window = main_window
         print("move: " + str(roll) + " player index: " + str(self.player_num))
         self.moving = True
-        
-        if self.in_jail and False: ## TODO - reimplement jail
-            if self.attempt_jail_leave():
-                self.in_jail = False
-                self.position = 10 ## i think this is just visiting??
-                ## move peice
-                time.sleep(0.1)
-            else:
-                return ## return so that the rest of the turn is nullified
 
         self.position = (self.position + 1) % 40
-        if self.position == 0: self.money += 200
         main_window.move_player_icon(self.player_num, spceDict.space_positions[self.position])
+        if self.position == 0: 
+            self.passed_go = True
+            self.money += 200
+        
         
         if roll > 1:
             qtm.singleShot(300, lambda: self.move(roll - 1, main_window))
         else:
             self.moving = False
         ## move peice
-    
-    def finish_movement(self, space):
-        self.handling_action = True
-        match space.action:
-            case -1: pass ## no action
-            case 0: self.pull_card_opp()
-            case 1: self.pull_card_pot()
-            case 2: pass ## TODO - take parking
-            case 3: self.pay_parking(200)
-            case 4: self.pay_parking(100)
-            case 5: self.go_to_jail()
-        self.handling_action = False
         
     def attempt_pay(self, amount:int) -> int:
         if amount > self.money: 
@@ -80,6 +63,12 @@ class player:
     
     def pay_player(self, to:player, amount:int) -> None:
         to.money += self.attempt_pay(amount)
+
+    def property_purchase(self, space:space.space) -> None:
+        print("property purchased")
+        self.money -= space.cost
+        space.owner = self
+        self.properties.append(space)
 
     def pull_card_opp(self) -> None: pass
     def pull_card_pot(self) -> None: pass    

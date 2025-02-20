@@ -37,6 +37,7 @@ running:bool = False
 current_turn:int = 0
 selectedPlayerNo = False
 noOfPlayers:int = -1
+free_parking_pot:int = 0
 
 previous_roll:int = 0
 previous_roll_was_double:bool = False
@@ -84,14 +85,14 @@ def loop() -> None:
     
     new_state:bool = loop_state != prev_loop_state
     prev_loop_state = loop_state
+    current_player = players[current_turn]
     
     if loop_state == 0 and new_state: ## roll dice (state 0)
         print("dice roll started")
         main_window.promptDiceRoll(current_turn + 1)
+        current_player.handling_action = True
     
     if loop_state == 1: ## roll finished - move player (state 1)
-        current_player = players[current_turn]
-        
         if new_state: ## dice roll just finished 
             allow_move:bool = True
             
@@ -117,7 +118,12 @@ def loop() -> None:
         
         if not current_player.moving: ## finished moving
             print("player finished moving")
-            current_player.finish_movement(spaces[current_player.position])
+            space = spaces[current_player.position]
+            player_movement_finished(current_player, space)
+            loop_state = 2
+    
+    if loop_state == 2:
+        if not current_player.handling_action:
             if previous_roll_was_double:
                 loop_state = 0 ## player reroll
                 double_count += 1
@@ -126,12 +132,45 @@ def loop() -> None:
                 loop_state = -1
                 double_count = 0
         
-    elif loop_state == -1: ## turn finished]
+    elif loop_state == -1: ## turn finished
         current_turn = (current_turn + 1) % noOfPlayers
         loop_state = 0
     
     qtm.singleShot(500, loop)
 
+def player_movement_finished(player:plyr.player, space:spce.space) -> None:
+    print(player.properties)
+    if space.is_property:
+        if space.owner:
+            player.pay_player(space.owner, space.get_price()) # pay owner if owned
+            player.handling_action = False
+            
+        elif player.money >= space.cost:
+            buy_prompt = PropertyWindow(player, space) # open property prompt to buy
+            buy_prompt.show()
+    
+    else: ## is not property
+        global free_parking_pot
+        match space.action:
+            case -1: pass ## no action
+            
+            case 0: player.pull_card_opp()
+            case 1: player.pull_card_pot()
+            
+            case 2: ## take FP
+                player.money += free_parking_pot
+                free_parking_pot = 0
+            case 3: ## pay 200 fine to FP
+                player.money -= 200
+                free_parking_pot += 200
+            case 4: ## pay 100 fine to FP
+                player.money -= 100
+                free_parking_pot += 100
+            
+            case 5:  ## go to jail
+                player.go_to_jail()
+
+        player.handling_action = False
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -194,7 +233,6 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         running = False
         qtw.QApplication.instance().quit() #closes application
 
-    
     def helpbuttonpressed(self):
         self.help_window_open = HelpWindow() #opens up the help window
         self.help_window_open.show()
@@ -254,7 +292,6 @@ class HelpWindow (qtw.QMainWindow):
         scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.setCentralWidget(scroll_area)
         
-
     def resizeEvent(self, event):
         #this method resizes image dynamically when window is resized by user
         self.update_pixmap_size()
@@ -488,8 +525,14 @@ class diceRoll(qtw.QMainWindow):
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class PropertyWindow(qtw.QMainWindow):
-    def __init__(self,):
+    player:plyr.player
+    space:spce.space
+    
+    def __init__(self, player:plyr.player, space):
         super().__init__()
+        self.player = player
+        self.space = space
+        
         self.setWindowTitle("Buy Properties?")
         self.resize(926,652)
         self.setStyleSheet("background-image: url('"+ get_image_path("TempBackground", "Property_Buy") +"'); background-repeat: repeat;")
@@ -499,6 +542,7 @@ class PropertyWindow(qtw.QMainWindow):
         self.propertyYes.setIconSize(qtc.QSize(150,300)) 
         self.propertyYes.setGeometry(100,150,300,90)
         self.propertyYes.setStyleSheet("QPushButton {background: transparent; border: none;}")
+        self.propertyYes.pressed.connect(lambda : self.button_pressed(True))
 
 
         self.propertyNo = qtw.QPushButton("",self)
@@ -506,11 +550,20 @@ class PropertyWindow(qtw.QMainWindow):
         self.propertyNo.setIconSize(qtc.QSize(130,300)) 
         self.propertyNo.setGeometry(300,150,700,90)
         self.propertyNo.setStyleSheet("QPushButton {background: transparent; border: none;}")
+        self.propertyNo.pressed.connect(lambda : self.button_pressed(False))
+        
         self.show()
+        
+    def button_pressed(self, accept:bool):
+        if accept:
+            self.player.property_purchase(self.space)
+        self.player.handling_action = False
+        self.close()
+
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app = qtw.QApplication([])
-mw = PropertyWindow()
+mw = StartWindow()
 '''CONOR. WHEN TESTING, CHANGE THE VALUE OF 'mw' TO THE NAME OF THE UI CLASS YOU WANT TO TEST. THIS WILL MAKE IT DISPLAY. love you'''
 
 app.exec_()
