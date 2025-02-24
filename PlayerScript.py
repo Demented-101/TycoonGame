@@ -46,7 +46,15 @@ class player:
         else:
             self.moving = False
         ## move peice
+       
+    def go_to(self, position:int) -> None:
+        old_position = self.position
+        self.position = position
+        self.main_window.move_player_icon(self.player_num, spceDict.space_positions[self.position])
         
+        if old_position > self.position: ## has passed go
+            self.money += 200
+     
     def attempt_pay(self, amount:int) -> int:
         if amount > self.money: 
             self.is_bankrupt = True
@@ -56,9 +64,6 @@ class player:
         else:
             self.money -= amount
             return amount
-    
-    def pay_parking(self, amount:int) -> None:
-        to_pay_middle = self.attempt_pay(amount) ## TODO - add to free parking total
     
     def pay_player(self, to:player, amount:int) -> None:
         to.money += self.attempt_pay(amount)

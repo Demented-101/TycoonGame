@@ -9,7 +9,6 @@
 # James Bardell - 
 #
 
-
 #importing necessary libraries to use UI (PyQt5)
 
 import PyQt5.QtWidgets as qtw
@@ -20,10 +19,11 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QTimer as qtm
 
+#Importing other libraries to use throughout the program
+
 import PlayerScript as plyr
 import Spaces as spce
-
-#Importing other libraries to use throughout the program
+import PotLuck as CardsPL
 
 import random as ran
 import sys
@@ -38,6 +38,8 @@ current_turn:int = 0
 selectedPlayerNo = False
 noOfPlayers:int = -1
 free_parking_pot:int = 0
+
+potluck_cards:list
 
 previous_roll:int = 0
 previous_roll_was_double:bool = False
@@ -65,12 +67,15 @@ def get_image_path(name:str, folder:str) -> str:
 
 def start(player_count:int) -> None:
     print("START METHOD RUN")
-    global players, spaces, current_turn
+    global players, spaces, current_turn, potluck_cards
     
     current_turn = 0
     
     for i in range(player_count): 
         players.append(plyr.player(i))
+        
+    potluck_cards = CardsPL.cards.copy()
+    ran.shuffle(potluck_cards)
     
     spaces = spce.load_spaces()
     qtm.singleShot(1000, loop) # wait until game loop starts
@@ -175,6 +180,43 @@ def player_movement_finished(player:plyr.player, space:spce.space) -> None:
 
         player.handling_action = False
 
+def pull_potluck_card(player:plyr.player) -> None:
+    global potluck_cards
+    picked_card = potluck_cards.pop(0) ## take first card
+    potluck_cards.append(picked_card) ## add to the back of the deck
+    
+    action = picked_card[1]
+    operand = picked_card[2]
+    
+    match action:
+        case 0: ## get money
+            player.money += operand
+        case 1: ## go to location
+            player.go_to(operand)
+        case 2: ## pay bank
+            player.attempt_pay(operand)
+        case 3: ## pay free parking
+            global free_parking_pot
+            free_parking_pot += player.attempt_pay(operand)
+        case 4: ## go to jail
+            player.go_to_jail()
+        case 5: ## all players pay player
+            global players
+            targets = players.copy()
+            targets.remove(player) ## get list of every player but the one receiving the money
+            for i in targets:
+                player.money += i.attempt_pay(operand) ## loop list - each pay
+        case 6:
+            player.GOOJ_cards.append(False)
+        case 7:
+            if False: ## pay 10 ## TODO - add pay prompt.
+                pull_opp_knock_card(player)
+            else:
+                player.attempt_pay(operand)
+
+def pull_opp_knock_card(player:plyr.player) -> None:
+    pass 
+
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
@@ -199,9 +241,10 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.closebutton.setToolTip("Close Game")
         self.closebutton.clicked.connect(self.closebuttonpressed) #call to function when close button is pressed
         
+        #Player Icon loading
         global noOfPlayers
         for i in range(noOfPlayers):
-            self.create_player_icon("Boot.png")
+            self.create_player_icon(["Boot", "HatStand", "Smartphone", "Boot", "Boot", "Boot"][i] + ".png")
   
         self.helpbutton = qtw.QPushButton("", self) # code to set up help button properties
         self.helpbutton.setIcon(qtg.QIcon(get_image_path("helpbutton.png", "Help")))
