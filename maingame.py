@@ -156,7 +156,13 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.closebutton.setStyleSheet("QPushButton { background: transparent; border: none; }")
         self.closebutton.setToolTip("Close Game")
         self.closebutton.clicked.connect(self.closebuttonpressed) #call to function when close button is pressed
-        
+
+        #MoneyBoard
+        moneyBoard = qtw.QLabel(self)
+        moneyBoard.setPixmap(qtg.QPixmap(get_image_path("moneyBoardbackground.png", "MoneyBoard")))
+        moneyBoard.setGeometry(5,5,435,410)
+        moneyBoard.setScaledContents(True)
+    
         global noOfPlayers
         for i in range(noOfPlayers):
             self.create_player_icon("Boot.png")
@@ -510,7 +516,7 @@ class PropertyWindow(qtw.QMainWindow):
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app = qtw.QApplication([])
-mw = PropertyWindow()
+mw = MainWindow()
 '''CONOR. WHEN TESTING, CHANGE THE VALUE OF 'mw' TO THE NAME OF THE UI CLASS YOU WANT TO TEST. THIS WILL MAKE IT DISPLAY. love you'''
 
 app.exec_()
