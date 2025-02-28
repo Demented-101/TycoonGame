@@ -10,7 +10,7 @@ class space:
     ## PROPERTY ONLY
     owner = None
     group:int ## -1 is Utility, 0 is Station, the rest is each colour suit
-    cost:int ## cost to buy
+    cost:int = 0 ## cost to buy
     current_level:int = 0 ## house count
     house_cost:int ## cost to buy house
     unleveled_rent:int ## used when the owner does not have the full set
