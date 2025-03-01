@@ -200,14 +200,39 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.closebutton.clicked.connect(self.closebuttonpressed) #call to function when close button is pressed
 
         #MoneyBoard
-        moneyBoard = qtw.QLabel(self)
-        moneyBoard.setPixmap(qtg.QPixmap(get_image_path("moneyBoardbackground.png", "MoneyBoard")))
-        moneyBoard.setGeometry(5,5,435,410)
-        moneyBoard.setScaledContents(True)
-    
+        self.moneyBoard = QLabel(self)
+        self.moneyBoard.setPixmap(QPixmap(get_image_path("moneyBoardbackground.png", "MoneyBoard"))) #Money board
+        self.moneyBoard.setGeometry(5,5,435,480)
+        self.moneyBoard.setScaledContents(True)
+
+
+        self.moneyContainer = QWidget(self.moneyBoard)
+        self.moneyContainer.setGeometry(10,60,445,400)
+        self.moneyContainer.setStyleSheet("background: transparent;")
+        
+
+        self.moneylayout = QVBoxLayout(self.moneyContainer)
+        self.moneylayout.setContentsMargins(0,0,0,0)
+        self.moneylayout.setSpacing(1)
+
+        #creates an array of playerMoneydisplays
+        playerCountMoney= ["MoneyP1.png", "MoneyP2.png", "MoneyP3.png", "MoneyP4.png", "MoneyP5.png", "MoneyBoard"]
+
+        #Display Player Money on board
         global noOfPlayers
         for i in range(noOfPlayers):
+            money_label = QLabel(self.moneyContainer)
+            pixmap = QPixmap(get_image_path(playerCountMoney[i], "MoneyBoard"))
+            money_label.setPixmap(pixmap)
+            money_label.setScaledContents(True)
+            money_label.setFixedSize(70,75)
+            self.moneylayout.addWidget(money_label)
+
+        
+    
+        for i in range(noOfPlayers):
             self.create_player_icon("Boot.png")
+
   
         self.helpbutton = qtw.QPushButton("", self) # code to set up help button properties
         self.helpbutton.setIcon(qtg.QIcon(get_image_path("helpbutton.png", "Help")))
@@ -572,7 +597,7 @@ class PropertyWindow(qtw.QMainWindow):
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app = qtw.QApplication([])
-mw = PropertyWindow()
+mw = StartWindow()
 '''CONOR. WHEN TESTING, CHANGE THE VALUE OF 'mw' TO THE NAME OF THE UI CLASS YOU WANT TO TEST. THIS WILL MAKE IT DISPLAY. love you'''
 
 app.exec_()
