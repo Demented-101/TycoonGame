@@ -216,7 +216,7 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.moneylayout.setSpacing(1)
 
         #creates an array of playerMoneydisplays
-        playerCountMoney= ["MoneyP1.png", "MoneyP2.png", "MoneyP3.png", "MoneyP4.png", "MoneyP5.png", "MoneyBoard"]
+        playerCountMoney= ["BootM.png", "SmartphoneM.png", "CatM.png", "HatstandM.png", "MoneyP5.png", "MoneyBoard"]
 
         #Display Player Money on board
         global noOfPlayers
@@ -225,7 +225,7 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
             pixmap = QPixmap(get_image_path(playerCountMoney[i], "MoneyBoard"))
             money_label.setPixmap(pixmap)
             money_label.setScaledContents(True)
-            money_label.setFixedSize(70,75)
+            money_label.setFixedSize(90,95)
             self.moneylayout.addWidget(money_label)
 
         
