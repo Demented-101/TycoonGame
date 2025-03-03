@@ -40,6 +40,7 @@ noOfPlayers:int = -1
 free_parking_pot:int = 0
 
 potluck_cards:list
+opp_knock_cards:list
 
 previous_roll:int = 0
 previous_roll_was_double:bool = False
@@ -215,7 +216,24 @@ def pull_potluck_card(player:plyr.player) -> None:
                 player.attempt_pay(operand)
 
 def pull_opp_knock_card(player:plyr.player) -> None:
-    pass 
+    global opp_knock_cards
+    picked_card = opp_knock_cards.pop(0)
+    opp_knock_cards.append(picked_card)
+    
+    action = picked_card[1]
+    operand = picked_card[2]
+    
+    match action:
+        case 0: ## get money
+            player.money += operand
+        case 1: ## go to location
+            player.go_to(operand)
+        case 2: ## pay bank
+            player.attempt_pay(operand)
+        case 3: ## pay free parking
+            global free_parking_pot
+            free_parking_pot += player.attempt_pay(operand)
+            
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
