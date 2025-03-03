@@ -9,6 +9,7 @@
 # James Bardell - 
 #
 
+
 #importing necessary libraries to use UI (PyQt5)
 
 import PyQt5.QtWidgets as qtw
@@ -23,7 +24,10 @@ from PyQt5.QtCore import QTimer as qtm
 
 import PlayerScript as plyr
 import Spaces as spce
-import PotLuck as CardsPL
+import OppKnock
+import PotLuck
+
+#Importing other libraries to use throughout the program
 
 import random as ran
 import sys
@@ -68,17 +72,20 @@ def get_image_path(name:str, folder:str) -> str:
 
 def start(player_count:int) -> None:
     print("START METHOD RUN")
-    global players, spaces, current_turn, potluck_cards
+    global players, spaces, current_turn, potluck_cards, opp_knock_cards
     
     current_turn = 0
     
     for i in range(player_count): 
         players.append(plyr.player(i))
-        
-    potluck_cards = CardsPL.cards.copy()
-    ran.shuffle(potluck_cards)
+        print(i)
     
-    spaces = spce.load_spaces()
+    spaces = spce.load_spaces() ## load spaces and cards
+    opp_knock_cards = OppKnock.cards.copy()
+    ran.shuffle(opp_knock_cards)
+    potluck_cards = PotLuck.cards.copy()
+    ran.shuffle(potluck_cards.append)
+
     qtm.singleShot(1000, loop) # wait until game loop starts
 
 loop_state:int = 0
@@ -101,6 +108,8 @@ def loop() -> None:
             current_player.handling_action = True
     
     if loop_state == 1: ## roll finished - move player (state 1)
+        current_player = players[current_turn]
+        
         if new_state: ## dice roll just finished 
             allow_move:bool = True
             
@@ -209,6 +218,7 @@ def pull_potluck_card(player:plyr.player) -> None:
                 player.money += i.attempt_pay(operand) ## loop list - each pay
         case 6:
             player.GOOJ_cards.append(False)
+            potluck_cards.remove(len(potluck_cards) - 1) ## remove the card from the deck
         case 7:
             if False: ## pay 10 ## TODO - add pay prompt.
                 pull_opp_knock_card(player)
@@ -233,8 +243,22 @@ def pull_opp_knock_card(player:plyr.player) -> None:
         case 3: ## pay free parking
             global free_parking_pot
             free_parking_pot += player.attempt_pay(operand)
+        case 4:
+            fine:int = 0
+            for i in player.properties:
+                if i.current_level == 0: pass
+                elif i.current_level == 5: fine += [115, 100][operand]
+                else: fine += i.current_level * [40, 25][operand]
+            player.attempt_pay(fine)
+        case 5:
+            new_position = player.position - operand
+            player.go_to(new_position)
+        case 6:
+            player.go_to_jail()
+        case 7:
+            player.GOOJ_cards.append(True)
+            opp_knock_cards.remove(len(opp_knock_cards) - 1) ## remove the card from the deck
             
-
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
@@ -638,7 +662,6 @@ class PropertyWindow(qtw.QMainWindow):
         self.propertyYes.setStyleSheet("QPushButton {background: transparent; border: none;}")
         self.propertyYes.pressed.connect(lambda : self.button_pressed(True))
 
-
         self.propertyNo = qtw.QPushButton("",self)
         self.propertyNo.setIcon(qtg.QIcon(get_image_path("No.png", "Property_Buy")))
         self.propertyNo.setIconSize(qtc.QSize(180,350)) 
@@ -657,7 +680,7 @@ class PropertyWindow(qtw.QMainWindow):
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app = qtw.QApplication([])
-mw = StartWindow()
+mw = PropertyWindow()
 '''CONOR. WHEN TESTING, CHANGE THE VALUE OF 'mw' TO THE NAME OF THE UI CLASS YOU WANT TO TEST. THIS WILL MAKE IT DISPLAY. love you'''
 
 app.exec_()
