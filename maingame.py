@@ -84,7 +84,7 @@ def start(player_count:int) -> None:
     opp_knock_cards = OppKnock.cards.copy()
     ran.shuffle(opp_knock_cards)
     potluck_cards = PotLuck.cards.copy()
-    ran.shuffle(potluck_cards.append)
+    ran.shuffle(potluck_cards)
 
     qtm.singleShot(1000, loop) # wait until game loop starts
 
@@ -680,7 +680,7 @@ class PropertyWindow(qtw.QMainWindow):
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app = qtw.QApplication([])
-mw = PropertyWindow()
+mw = StartWindow()
 '''CONOR. WHEN TESTING, CHANGE THE VALUE OF 'mw' TO THE NAME OF THE UI CLASS YOU WANT TO TEST. THIS WILL MAKE IT DISPLAY. love you'''
 
 app.exec_()
