@@ -301,11 +301,13 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.moneylayout.setSpacing(1)
 
         #creates an array of playerMoneydisplays
-        playerCountMoney= ["BootM.png", "SmartphoneM.png", "CatM.png", "HatstandM.png", "MoneyP5.png", "MoneyBoard"]
+        playerCountMoney = ["BootM.png", "SmartphoneM.png", "CatM.png", "HatstandM.png", "MoneyP5.png", "MoneyP5.png"] ## replace two final with new
+        playerGamePeice = ["Boot.png", "Smartphone.png", "CatM.png", "HatStand.png",  "Boot.png", "Boot.png"]
 
         #Display Player Money on board
         global noOfPlayers
         for i in range(noOfPlayers):
+            ## create player money label on side
             money_label = QLabel(self.moneyContainer)
             pixmap = QPixmap(get_image_path(playerCountMoney[i], "MoneyBoard"))
             money_label.setPixmap(pixmap)
@@ -313,12 +315,9 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
             money_label.setFixedSize(90,95)
             self.moneylayout.addWidget(money_label)
 
-        
-    
-        for i in range(noOfPlayers):
-            self.create_player_icon("Boot.png")
+            ## create gamepeice
+            self.create_player_icon(playerGamePeice[i])
 
-  
         self.helpbutton = qtw.QPushButton("", self) # code to set up help button properties
         self.helpbutton.setIcon(qtg.QIcon(get_image_path("helpbutton.png", "Help")))
         self.helpbutton.setIconSize(qtc.QSize(60, 60)) 
