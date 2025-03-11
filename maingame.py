@@ -169,6 +169,9 @@ def player_movement_finished(player:plyr.player, space:spce.space) -> None:
         elif player.money >= space.cost and player.passed_go:
             buy_prompt = PropertyWindow(player, space) # open property prompt to buy
             buy_prompt.show()
+
+        else:
+            player.handling_action = False
     
     else: ## is not property
         global free_parking_pot
