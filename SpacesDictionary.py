@@ -85,4 +85,46 @@ space_positions:list[list[int]] = [ ## each position on the board in order
     [1410,770],
     [1410,850],
 ]
+space_card_paths:list[str] = [
+    "N/a",
+    "The Old creek.png", 
+    "N/a",
+    "Gangsters Paradise.png",
+    "N/a",
+    "N/a", ## STATION 1 HERE
+    "The Angels Delight.png",
+    "N/a",
+    "Potter Avenue.png",
+    "Granger Drive.png",
+    "N/a",
+    "Skywalker Drive.png",
+    "N/a", ## TESLA POWER GOES HERE
+    "Wookie Hole.png",
+    "Rey Lane.png",
+    "N/a", ## STATION 2 HERE
+    "Bishop Drive.png",
+    "N/a",
+    "Durham Street.png",
+    "Broyles Lane.png",
+    "N/a",
+    "Yue Fei Square.png",
+    "N/a",
+    "Mulan Rouge.png",
+    "Han Xin Gardens.png",
+    "N/a", ## STATION 3 HERE
+    "Shatner Close.png",
+    "Picard Avenue.png",
+    "N/a", ## EDISON WATER HERE
+    "Crusher Creek.png",
+    "N/a",
+    "Sirat Mews.png",
+    "Ghengis Crescent.png",
+    "N/a",
+    "Ibis Close",
+    "N/a" ## STATION 4 HERE
+    "N/a",
+    "James Webb Way.png",
+    "N/a",
+    "Turing Heights.png"
 
+]

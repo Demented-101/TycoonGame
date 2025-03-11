@@ -24,6 +24,7 @@ from PyQt5.QtCore import QTimer as qtm
 
 import PlayerScript as plyr
 import Spaces as spce
+import SpacesDictionary as spceDict
 import OppKnock
 import PotLuck
 
@@ -165,7 +166,7 @@ def player_movement_finished(player:plyr.player, space:spce.space) -> None:
             player.pay_player(space.owner, space.get_price()) # pay owner if owned
             player.handling_action = False
             
-        elif player.money >= space.cost:
+        elif player.money >= space.cost and player.passed_go:
             buy_prompt = PropertyWindow(player, space) # open property prompt to buy
             buy_prompt.show()
     
@@ -646,7 +647,7 @@ class PropertyWindow(qtw.QMainWindow):
     player:plyr.player
     space:spce.space
     
-    def __init__(self, player:plyr.player, space):
+    def __init__(self, player:plyr.player, space:int):
         super().__init__()
         self.player = player
         self.space = space
@@ -668,6 +669,12 @@ class PropertyWindow(qtw.QMainWindow):
         self.propertyNo.setGeometry(300,150,700,90)
         self.propertyNo.setStyleSheet("QPushButton {background: transparent; border: none;}")
         self.propertyNo.pressed.connect(lambda : self.button_pressed(False))
+
+        card_image_path = get_image_path(spceDict.space_card_paths[space],"PropertyCards")
+        if spceDict.space_card_paths[space] != "N/a":
+            pass ## HENRY - SET THE IMAGE HERE. 
+                ## "card_image_path" is the path to the card you have landed on.#
+                ## this if wont run if the space doesnt have a card.
         
         self.show()
         
