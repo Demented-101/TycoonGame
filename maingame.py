@@ -668,6 +668,10 @@ class PropertyWindow(qtw.QMainWindow):
         self.propertyNo.setGeometry(300,150,700,90)
         self.propertyNo.setStyleSheet("QPushButton {background: transparent; border: none;}")
         self.propertyNo.pressed.connect(lambda : self.button_pressed(False))
+        
+        self.cardWindow = qtw.QLabel(self)
+        self.cardWindow.setGeometry(200,310,500,100)
+        self.cardWindow.setStyleSheet("background-color: black")
 
         card_image_path = get_image_path(spceDict.space_card_paths[space],"PropertyCards")
         if spceDict.space_card_paths[space] != "N/a":
