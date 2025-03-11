@@ -304,8 +304,8 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.moneylayout.setSpacing(1)
 
         #creates an array of playerMoneydisplays
-        playerCountMoney = ["BootM.png", "SmartphoneM.png", "CatM.png", "HatstandM.png", "MoneyP5.png", "MoneyP5.png"] ## replace two final with new
-        playerGamePeice = ["Boot.png", "Smartphone.png", "CatM.png", "HatStand.png",  "Boot.png", "Boot.png"]
+        playerCountMoney = ["BootM.png", "SmartphoneM.png", "CatM.png", "HatstandM.png", "ShipM.png", "MoneyP5.png"] ## replace two final with new
+        playerGamePeice = ["Boot.png", "Smartphone.png", "Cat.png", "HatStand.png",  "Ship.png", "Boot.png"]
 
         #Display Player Money on board
         global noOfPlayers
