@@ -303,6 +303,7 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.moneylayout.setContentsMargins(0,0,0,0)
         self.moneylayout.setSpacing(1)
 
+
         #creates an array of playerMoneydisplays
         playerCountMoney = ["BootM.png", "SmartphoneM.png", "CatM.png", "HatstandM.png", "ShipM.png", "MoneyP5.png"] ## replace two final with new
         playerGamePeice = ["Boot.png", "Smartphone.png", "Cat.png", "HatStand.png",  "Ship.png", "Boot.png"]
@@ -317,9 +318,22 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
             money_label.setScaledContents(True)
             money_label.setFixedSize(90,95)
             self.moneylayout.addWidget(money_label)
+            
+            ##link board to player money
+            playerMoney = QLabel("£" , self.moneyContainer)
+            playerMoney.setStyleSheet("font-size: 20px; color: black;")
+            self.moneylayout.addWidget(playerMoney)
+
+            #store label for updating money
+            self.playerMoneyLabels = playerMoney
 
             ## create gamepeice
             self.create_player_icon(playerGamePeice[i])
+        
+        #function to update player money on board
+        def update_player_money(self, player_index, new_money_amount):
+            if player_index in self.playerMoneyLabels:
+                    self.playerMoneyLabels[player_index].setText("£" + new_money_amount)
 
         self.helpbutton = qtw.QPushButton("", self) # code to set up help button properties
         self.helpbutton.setIcon(qtg.QIcon(get_image_path("helpbutton.png", "Help")))
