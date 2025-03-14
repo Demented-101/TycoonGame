@@ -68,7 +68,7 @@ class player:
     
     def pay_player(self, to:player, amount:int) -> None:
         to.money += self.attempt_pay(amount)
-        print("player " + str(self.player_num + " payed player " + str(to.player_num) + " £" + str(amount)))
+        print("player " + str(self.player_num) + " payed player " + str(to.player_num) + " £" + str(amount))
 
     def property_purchase(self, space:space.space) -> None:
         print("player " + str(self.player_num) + " purchased property " + space.name)

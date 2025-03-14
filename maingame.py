@@ -352,19 +352,17 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         #MoneyBoard
         self.moneyBoard = QLabel(self)
         self.moneyBoard.setPixmap(QPixmap(get_image_path("moneyBoardbackground.png", "MoneyBoard"))) #Money board
-        self.moneyBoard.setGeometry(5,5,435,480)
+        self.moneyBoard.setGeometry(5,5,435,960)
         self.moneyBoard.setScaledContents(True)
 
 
         self.moneyContainer = QWidget(self.moneyBoard)
-        self.moneyContainer.setGeometry(10,60,445,400)
+        self.moneyContainer.setGeometry(10,60,445,800)
         self.moneyContainer.setStyleSheet("background: transparent;")
         
-
         self.moneylayout = QVBoxLayout(self.moneyContainer)
         self.moneylayout.setContentsMargins(0,0,0,0)
         self.moneylayout.setSpacing(1)
-
 
         #creates an array of playerMoneydisplays
         playerCountMoney = ["BootM.png", "SmartphoneM.png", "CatM.png", "HatstandM.png", "ShipM.png", "MoneyP5.png"] ## replace two final with new
@@ -444,10 +442,11 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         icon.setGeometry(position[0] - 50, position[1] - 50, 100, 100)
        
     def update_money_text(self):
+        print("HELLO HI HELLO WHAT WHY")
         for i in range(6): ## for each active player
             global players
             label:QLabel = self.money_texts[i]
-            label.text = "£" + str(players[i].money)
+            label.setText("£" + str(players[i].money))
         
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
 
