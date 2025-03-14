@@ -11,6 +11,7 @@ class space:
     owner = None
     group:int ## -1 is Utility, 0 is Station, the rest is each colour suit
     cost:int = 0 ## cost to buy
+    benefit:float = 1 ## benefit used for agent decisions
     current_level:int = 0 ## house count
     house_cost:int ## cost to buy house
     unleveled_rent:int ## used when the owner does not have the full set
@@ -32,9 +33,10 @@ class space:
         self.cost = space_temp["prices"][1]
         self.unleveled_rent = space_temp["prices"][2]
         self.rent = space_temp["prices"][3:7]
+        self.benefit = space_temp["benefit"]
 
     def get_price(self) -> int:
-        amount_in_group:int ## get amount in same set
+        amount_in_group:int = 0 ## get amount in same set
         for i in self.owner.properties:
             if i.group == self.group: amount_in_group += 1
 

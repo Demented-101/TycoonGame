@@ -41,7 +41,6 @@ import time
 running:bool = False
 current_turn:int = 0
 selectedPlayerNo = False
-noOfPlayers:int = -1
 free_parking_pot:int = 0
 
 potluck_cards:list
@@ -77,9 +76,11 @@ def start(player_count:int) -> None:
     
     current_turn = 0
     
-    for i in range(player_count): 
+    for i in range(6): 
         players.append(plyr.player(i))
-        print(i)
+        if i >= player_count:
+            players[i].setup_agent()
+        else: print("setup human player - " + str(i))
     
     spaces = spce.load_spaces() ## load spaces and cards
     opp_knock_cards = OppKnock.cards.copy()
@@ -96,6 +97,7 @@ def loop() -> None:
     global players, spaces, main_window
     global previous_roll, previous_roll_was_double, double_count
     
+    main_window.update_money_text()
     new_state:bool = loop_state != prev_loop_state
     prev_loop_state = loop_state
     current_player = players[current_turn]
@@ -105,7 +107,7 @@ def loop() -> None:
             loop_state = -1
         else:
             print("dice roll started")  
-            main_window.promptDiceRoll(current_turn + 1)
+            main_window.promptDiceRoll(current_turn + 1, current_player.is_agent)
             current_player.handling_action = True
     
     if loop_state == 1: ## roll finished - move player (state 1)
@@ -115,7 +117,7 @@ def loop() -> None:
             allow_move:bool = True
             
             if current_player.in_jail: ## in jail
-                escaped = current_player.attempt_jail_leave(previous_roll_was_double)
+                escaped = player_attempt_leave_jail(current_player, previous_roll_was_double)
                 if escaped:
                     current_player.in_jail = False
                     current_player.position = 10
@@ -131,7 +133,7 @@ def loop() -> None:
                 previous_roll_was_double = False
                 
             if allow_move: 
-                print("dice roll finished - moving player") 
+                print("dice roll finished - moving player")
                 current_player.move(previous_roll, main_window)
         
         if not current_player.moving: ## finished moving
@@ -145,7 +147,7 @@ def loop() -> None:
             if previous_roll_was_double:
                 loop_state = 0 ## player reroll
                 double_count += 1
-                print(double_count)
+                print("double count -" + str(double_count))
             else:
                 loop_state = -1
                 double_count = 0
@@ -153,33 +155,40 @@ def loop() -> None:
     elif loop_state == -1: ## turn finished
         found_player:bool = False
         while not found_player:
-            current_turn = (current_turn + 1) % noOfPlayers
+            current_turn = (current_turn + 1) % 6
             found_player = not players[current_turn].is_bankrupt 
         loop_state = 0
+        print(".")
     
     qtm.singleShot(500, loop)
 
 def player_movement_finished(player:plyr.player, space:spce.space) -> None:
-    print("current properties:" + str(player.properties))
+    print("current properties- " + str(player.properties))
     if space.is_property:
         if space.owner:
             player.pay_player(space.owner, space.get_price()) # pay owner if owned
             player.handling_action = False
             
-        elif player.money >= space.cost and player.passed_go:
-            buy_prompt = PropertyWindow(player, space) # open property prompt to buy
-            buy_prompt.show()
+        elif player.money >= space.cost: # and player.passed_go:
+            if player.is_agent:
+                if player.agent_decision(player.decide_property_benefit(space), space.cost):
+                    player.property_purchase(space)
+                player.handling_action = False
+            else:
+                buy_prompt = PropertyWindow(player, space.space_index) # open property prompt to buy
+                buy_prompt.show()
 
         else:
             player.handling_action = False
     
     else: ## is not property
         global free_parking_pot
+        player.handling_action = False
         match space.action:
             case -1: pass ## no action
             
-            case 0: player.pull_card_opp()
-            case 1: player.pull_card_pot()
+            case 0: pull_opp_knock_card(player)
+            case 1: pull_potluck_card(player)
             
             case 2: ## take FP
                 player.money += free_parking_pot
@@ -192,7 +201,27 @@ def player_movement_finished(player:plyr.player, space:spce.space) -> None:
             case 5:  ## go to jail
                 player.go_to_jail()
 
-        player.handling_action = False
+def player_attempt_leave_jail(player:plyr.player, rolled_double:bool) -> bool:
+    if player.jail_turns == 3 or rolled_double:
+        return True
+    
+    if len(player.GOOJ_cards) > 0:
+        global opp_knock_cards, potluck_cards
+        card = player.GOOJ_cards.pop()
+        ## add card back to proper deck
+        if card: opp_knock_cards.append(["Get out of jail Free", 7, -1])
+        else: potluck_cards.append(["Get out of jail Free", 6, -1])
+        
+        return True
+
+    if player.money > 50:
+        global free_parking_pot
+        if player.is_agent and player.agent_decision(player.jail_benefit, 50):
+            free_parking_pot += player.attempt_pay(50)
+        else:
+            pass ## input window popup here
+    
+    return False
 
 def pull_potluck_card(player:plyr.player) -> None:
     global potluck_cards
@@ -201,12 +230,27 @@ def pull_potluck_card(player:plyr.player) -> None:
     
     action = picked_card[1]
     operand = picked_card[2]
+    print("Pot Luck card pulled - " + picked_card[0])
     
     match action:
         case 0: ## get money
             player.money += operand
         case 1: ## go to location
+            global spaces
             player.go_to(operand)
+            space = spaces[operand]
+            if space.is_property:
+                if space.owner:
+                    player.pay_player(space.owner, space.get_price())
+                else:
+                    if player.is_agent: 
+                        if player.agent_decision(player.decide_property_benefit(space) + 0.3, space.cost):
+                            player.property_purchase(space)
+                    else:
+                        player.handling_action = True
+                        buy_prompt = PropertyWindow(player, space.space_index) # open property prompt to buy
+                        buy_prompt.show()
+                            
         case 2: ## pay bank
             player.attempt_pay(operand)
         case 3: ## pay free parking
@@ -224,7 +268,9 @@ def pull_potluck_card(player:plyr.player) -> None:
             player.GOOJ_cards.append(False)
             potluck_cards.remove(len(potluck_cards) - 1) ## remove the card from the deck
         case 7:
-            if False: ## pay 10 ## TODO - add pay prompt.
+            if player.is_agent and player.agent_decision(0.5, 10): ## add prompt to buy card - same as property chance
+                pull_opp_knock_card(player)
+            if False: ## pay 10 ## TODO - add pay prompt
                 pull_opp_knock_card(player)
             else:
                 player.attempt_pay(operand)
@@ -236,12 +282,27 @@ def pull_opp_knock_card(player:plyr.player) -> None:
     
     action = picked_card[1]
     operand = picked_card[2]
+    print("Oppotunity Knocks card pulled - " + picked_card[0])
     
     match action:
         case 0: ## get money
             player.money += operand
         case 1: ## go to location
+            global spaces
             player.go_to(operand)
+            space = spaces[operand]
+            if space.is_property:
+                if space.owner:
+                    player.pay_player(space.owner, space.get_price())
+                else:
+                    if player.is_agent:
+                        if player.agent_decision(player.decide_property_benefit(space) + 0.3, space.cost):
+                            player.property_purchase(space)
+                    else:
+                        player.handling_action = True
+                        buy_prompt = PropertyWindow(player, space.space_index) # open property prompt to buy
+                        buy_prompt.show()
+        
         case 2: ## pay bank
             player.attempt_pay(operand)
         case 3: ## pay free parking
@@ -268,6 +329,7 @@ def pull_opp_knock_card(player:plyr.player) -> None:
 class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
     
     player_icons:list = []
+    money_texts:list[QLabel] = []
     
     def __init__(self):
         global main_window
@@ -309,8 +371,7 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         playerGamePeice = ["Boot.png", "Smartphone.png", "Cat.png", "HatStand.png",  "Ship.png", "Boot.png"]
 
         #Display Player Money on board
-        global noOfPlayers
-        for i in range(noOfPlayers):
+        for i in range(6):
             ## create player money label on side
             money_label = QLabel(self.moneyContainer)
             pixmap = QPixmap(get_image_path(playerCountMoney[i], "MoneyBoard"))
@@ -323,9 +384,7 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
             playerMoney = QLabel("£" , self.moneyContainer)
             playerMoney.setStyleSheet("font-size: 20px; color: black;")
             self.moneylayout.addWidget(playerMoney)
-
-            #store label for updating money
-            self.playerMoneyLabels = playerMoney
+            self.money_texts.append(playerMoney)
 
             ## create gamepeice
             self.create_player_icon(playerGamePeice[i])
@@ -376,13 +435,19 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.dice_roll_open = diceRoll("Dice Roll")
         self.dice_roll_open.show()
     
-    def promptDiceRoll(self, player:int):
-        self.dice_roll_open = diceRoll("Player " + str(player) + "'s turn!")
+    def promptDiceRoll(self, player:int, speed_up:bool):
+        self.dice_roll_open = diceRoll("Player " + str(player) + "'s turn!", speed_up)
         self.dice_roll_open.show()
   
     def move_player_icon(self, player, position):
         icon = self.player_icons[player]
         icon.setGeometry(position[0] - 50, position[1] - 50, 100, 100)
+       
+    def update_money_text(self):
+        for i in range(6): ## for each active player
+            global players
+            label:QLabel = self.money_texts[i]
+            label.text = "£" + str(players[i].money)
         
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
 
@@ -505,9 +570,8 @@ class StartWindow(qtw.QMainWindow): #code for the start window in which the numb
         self.show()  # Show the window
 
     def load_players(self, count:int):
-        global selectedPlayerNo, noOfPlayers
+        global selectedPlayerNo
         selectedPlayerNo = True
-        noOfPlayers = count
         self.openWindow1 = MainWindow()
         self.close()
         
@@ -519,6 +583,7 @@ class diceRoll(qtw.QMainWindow):
     
     dice_images:list = []
     result_images:dict = {}
+    faster_roll:bool = False
     
     '''
     NOTES FOR CONOR
@@ -535,7 +600,7 @@ class diceRoll(qtw.QMainWindow):
     
     '''
     
-    def __init__(self, title:str):
+    def __init__(self, title:str, faster_roll:bool):
         super().__init__()
         self.setWindowTitle(title)
         self.resize(617,360)
@@ -553,6 +618,10 @@ class diceRoll(qtw.QMainWindow):
         self.diceRollButton.setIcon(qtg.QIcon(get_image_path("rollbutton.png", "Dice")))
         self.diceRollButton.setStyleSheet("QPushButton { background: transparent; border: none; }")
         self.diceRollButton.setIconSize(qtc.QSize(300, 200))
+        if faster_roll:
+            self.diceRollButton.hide()
+            qtm.singleShot(30, self.rollAnimation)
+            self.faster_roll = True
         
         #DEFINITIONS OF DICE ICONS
         
@@ -608,7 +677,7 @@ class diceRoll(qtw.QMainWindow):
         self.goToJailLabel.setStyleSheet("background: transparent; border: none;")
         
         self.diceRollButton.setDisabled(True) #immediately disable button so that it cannot be pressed again whilst the animation is still running.
-        if self.animationCounter < 10: #repeat roll 10 times as part of the animation
+        if self.animationCounter < 10 or (self.faster_roll and self.animationCounter < 5): #repeat roll 10 times as part of the animation
             randomface1 = ran.randint(0,5)
             self.dice1.setPixmap(self.dice_images[randomface1])
 
@@ -616,7 +685,10 @@ class diceRoll(qtw.QMainWindow):
             self.dice2.setPixmap(self.dice_images[randomface2])
             
             self.animationCounter += 1
-            qtm.singleShot(150, self.rollAnimation)  #wait 150ms, then reset then go again after incrementing the counter.
+            if self.faster_roll:
+                qtm.singleShot(50, self.rollAnimation)
+            else:
+                qtm.singleShot(150, self.rollAnimation)  #wait 150ms, then reset then go again after incrementing the counter.
         else:
             self.diceRollMethod()
     
@@ -630,8 +702,6 @@ class diceRoll(qtw.QMainWindow):
         total = diceRoll1 + diceRoll2
         previous_roll = total
         
-        print("Dice 1: " + str(diceRoll1))
-        print("Dice 2: " + str(diceRoll2))
         print("roll: " + str(total))
         
         if diceRoll1 == 4 and diceRoll2 == 3: #ignore this 
@@ -663,10 +733,11 @@ class PropertyWindow(qtw.QMainWindow):
     player:plyr.player
     space:spce.space
     
-    def __init__(self, player:plyr.player, space:int):
+    def __init__(self, player:plyr.player, space_index:int):
         super().__init__()
+        global spaces
         self.player = player
-        self.space = space
+        self.space = spaces[space_index]
         
         self.setWindowTitle("Buy Properties?")
         self.resize(926,652)
@@ -685,16 +756,12 @@ class PropertyWindow(qtw.QMainWindow):
         self.propertyNo.setGeometry(300,150,700,90)
         self.propertyNo.setStyleSheet("QPushButton {background: transparent; border: none;}")
         self.propertyNo.pressed.connect(lambda : self.button_pressed(False))
-        
-        self.cardWindow = qtw.QLabel(self)
-        self.cardWindow.setGeometry(200,310,500,100)
-        self.cardWindow.setStyleSheet("background-color: black")
 
-        card_image_path = get_image_path(spceDict.space_card_paths[space],"PropertyCards")
-        if spceDict.space_card_paths[space] != "N/a":
-            pass ## HENRY - SET THE IMAGE HERE. 
-                ## "card_image_path" is the path to the card you have landed on.#
-                ## this if wont run if the space doesnt have a card.
+        card_image_path = get_image_path(spceDict.space_card_paths[space_index],"PropertyCards")
+        if spceDict.space_card_paths[space_index] != "N/a":
+            self.cardWindow = qtw.QLabel(self)
+            self.cardWindow.setGeometry(200,310,500,1000)
+            self.cardWindow.setStyleSheet("background-image: url(" + card_image_path + "); background-repeat: repeat;")
         
         self.show()
         

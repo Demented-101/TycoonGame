@@ -12,6 +12,7 @@ from PyQt5.QtCore import QTimer as qtm
 
 class player:
     player_num:int = 0
+    is_agent:bool = False
     is_bankrupt:bool = False
     position:int = 0
     passed_go:bool = False
@@ -40,14 +41,13 @@ class player:
             self.passed_go = True
             self.money += 200
         
-        
         if roll > 1:
             qtm.singleShot(300, lambda: self.move(roll - 1, main_window))
         else:
             self.moving = False
-        ## move peice
        
     def go_to(self, position:int) -> None:
+        print("player go to position " + str(position))
         old_position = self.position
         self.position = position
         self.main_window.move_player_icon(self.player_num, spceDict.space_positions[self.position])
@@ -61,39 +61,78 @@ class player:
             prev_money = self.money
             self.money = 0
             return prev_money
+            print("PLAYER" + str(self.player_num) + "BANKRUPT")
         else:
             self.money -= amount
             return amount
     
     def pay_player(self, to:player, amount:int) -> None:
         to.money += self.attempt_pay(amount)
+        print("player " + str(self.player_num + " payed player " + str(to.player_num) + " £" + str(amount)))
 
     def property_purchase(self, space:space.space) -> None:
-        print("property purchased")
+        print("player " + str(self.player_num) + " purchased property " + space.name)
         self.money -= space.cost
         space.owner = self
         self.properties.append(space)
-
-    def pull_card_opp(self) -> None: pass
-    def pull_card_pot(self) -> None: pass    
     
     def go_to_jail(self) -> None:
         self.in_jail = True
         self.jail_turns = 0
         self.position = 10
         self.main_window.move_player_icon(self.player_num, spceDict.jail_position)
+        print("player " + str(self.player_num) + " went to jail")
     
-    def attempt_jail_leave(self, rolled_double:bool) -> bool:
-        if self.jail_turns == 3 or rolled_double:
+    ## AGENTS -----------------------------------------------------------------------
+    
+    decision_chance:int = -1 ## chance that they will take a monetary decision
+    poor_decision_chance:int = -1 ## chance they will take a monetaty decision while under the "poor threshold"
+    poor_threshold:float = 0.5 ## when under this threshold percentage wise compared to the cost of the purchase
+    absolute_no_dist:int = 10 ## how far the price must be from the amount of money the player has to always say no
+    group_preference:float = 1.2 ## how much the benefit is multiplied per existing property in the same group
+    jail_benefit:float = 1 ## benefit used when deciding to pay to leave jail.
+    is_henry:bool = False ## will always go all in
+    
+    def setup_agent(self) -> None:
+        self.is_agent = True
+        self.decision_chance = ran.randint(15, 85)
+        self.poor_decision_chance = self.decision_chance - ran.randint(10, 40)
+        self.poor_threshold = ran.random() + 1.5
+        if self.poor_threshold > 2.3:
+            self.absolute_no_dist = ran.randint(30, 100)
+        else:
+            self.absolute_no_dist = ran.randint(0, 30)
+        self.group_preference = 1.2 + (ran.random() * 0.5)
+        self.jail_benefit = ran.random() + 0.5
+        self.is_henry = ran.randint(0, 99) == 69
+        
+    def decide_property_benefit(self, space:space.space) -> float:
+        benefit:float = space.benefit
+        for i in self.properties:
+            if i.group == space.group:
+                benefit *= self.group_preference
+            else:
+                benefit -= ran.random() * 0.05
+        
+        print("agent " + str(self.player_num) + " decided proptery benefit - " + str(benefit))
+        return benefit
+    
+    def agent_decision(self, benefit:float, cost:int) -> bool:
+        if cost >= self.money - self.absolute_no_dist:
+            print("agent " + str(self.player_num) + " decided flat out no")
+            return False
+        
+        if self.is_henry:
+            print("ALL IN MOTHER FUCKERS")
             return True
         
-        if False:#disabled until prompt is ready
-            return True ## TODO - prompt choice for this
+        true_decision_chance = self.decision_chance
+        if cost * self.poor_threshold > self.money:
+            true_decision_chance = self.poor_decision_chance
+            print("agent decision chance reduced - poor decision chance used")
         
-        if len(self.GOOJ_cards) > 0:
-            card = self.GOOJ_cards.pop()
-            ## TODO - add back to respective pack
-            return True
-
-        self.jail_turns += 1
-        return False
+        true_decision_chance *= benefit
+        random_num = ran.randint(0,100)
+        print("agent " + str(self.player_num) + " decided " + str(true_decision_chance > random_num) + ". chance - " + str(true_decision_chance))
+        return true_decision_chance > random_num
+        
