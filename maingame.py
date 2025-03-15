@@ -72,6 +72,7 @@ def get_image_path(name:str, folder:str) -> str:
 
 def start(player_count:int) -> None:
     print("START METHOD RUN")
+    print(".")
     global players, spaces, current_turn, potluck_cards, opp_knock_cards
     
     current_turn = 0
@@ -80,7 +81,6 @@ def start(player_count:int) -> None:
         players.append(plyr.player(i))
         if i >= player_count:
             players[i].setup_agent()
-        else: print("setup human player - " + str(i))
     
     spaces = spce.load_spaces() ## load spaces and cards
     opp_knock_cards = OppKnock.cards.copy()
@@ -106,7 +106,7 @@ def loop() -> None:
         if current_player.is_bankrupt: ## skip go
             loop_state = -1
         else:
-            print("dice roll started")  
+            print("Player " + str(current_turn) + "'s turn!")
             main_window.promptDiceRoll(current_turn + 1, current_player.is_agent)
             current_player.handling_action = True
     
@@ -132,12 +132,10 @@ def loop() -> None:
                 allow_move = False
                 previous_roll_was_double = False
                 
-            if allow_move: 
-                print("dice roll finished - moving player")
+            if allow_move:
                 current_player.move(previous_roll, main_window)
         
         if not current_player.moving: ## finished moving
-            print("player finished moving")
             space = spaces[current_player.position]
             player_movement_finished(current_player, space)
             loop_state = 2
@@ -159,6 +157,7 @@ def loop() -> None:
             found_player = not players[current_turn].is_bankrupt 
         loop_state = 0
         print(".")
+        print(".")
     
     qtm.singleShot(500, loop)
 
@@ -169,7 +168,7 @@ def player_movement_finished(player:plyr.player, space:spce.space) -> None:
             player.pay_player(space.owner, space.get_price()) # pay owner if owned
             player.handling_action = False
             
-        elif player.money >= space.cost: # and player.passed_go:
+        elif player.money >= space.cost and player.passed_go:
             if player.is_agent:
                 if player.agent_decision(player.decide_property_benefit(space), space.cost):
                     player.property_purchase(space)
@@ -266,7 +265,7 @@ def pull_potluck_card(player:plyr.player) -> None:
                 player.money += i.attempt_pay(operand) ## loop list - each pay
         case 6:
             player.GOOJ_cards.append(False)
-            potluck_cards.remove(len(potluck_cards) - 1) ## remove the card from the deck
+            potluck_cards.remove(picked_card) ## remove the card from the deck
         case 7:
             if player.is_agent and player.agent_decision(0.5, 10): ## add prompt to buy card - same as property chance
                 pull_opp_knock_card(player)
@@ -322,7 +321,7 @@ def pull_opp_knock_card(player:plyr.player) -> None:
             player.go_to_jail()
         case 7:
             player.GOOJ_cards.append(True)
-            opp_knock_cards.remove(len(opp_knock_cards) - 1) ## remove the card from the deck
+            opp_knock_cards.remove(picked_card) ## remove the card from the deck
             
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -386,11 +385,6 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
 
             ## create gamepeice
             self.create_player_icon(playerGamePeice[i])
-        
-        #function to update player money on board
-        def update_player_money(self, player_index, new_money_amount):
-            if player_index in self.playerMoneyLabels:
-                    self.playerMoneyLabels[player_index].setText("£" + new_money_amount)
 
         self.helpbutton = qtw.QPushButton("", self) # code to set up help button properties
         self.helpbutton.setIcon(qtg.QIcon(get_image_path("helpbutton.png", "Help")))
@@ -401,7 +395,6 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.helpbutton.clicked.connect(self.helpbuttonpressed) #call to function if help button is pressed
         
         #TEST BUTTON TO IMPLEMENT DICE ROLL
-
         if False: ## turn this to true to reimplement the button :D
             self.diceRollTest = qtw.QPushButton("", self)
             self.diceRollTest.setIcon(qtg.QIcon(get_image_path("rollbutton.png", "Dice")))
@@ -442,7 +435,6 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         icon.setGeometry(position[0] - 50, position[1] - 50, 100, 100)
        
     def update_money_text(self):
-        print("HELLO HI HELLO WHAT WHY")
         for i in range(6): ## for each active player
             global players
             label:QLabel = self.money_texts[i]
