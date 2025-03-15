@@ -71,14 +71,14 @@ def get_image_path(name:str, folder:str) -> str:
 #main gameplay loop + other
 
 def start(player_count:int) -> None:
-    print("START METHOD RUN")
-    print(".")
+    main_window.add_text_log("Game Started!")
+    main_window.add_text_log(".")
     global players, spaces, current_turn, potluck_cards, opp_knock_cards
     
     current_turn = 0
     
     for i in range(6): 
-        players.append(plyr.player(i))
+        players.append(plyr.player(i, main_window))
         if i >= player_count:
             players[i].setup_agent()
     
@@ -106,7 +106,7 @@ def loop() -> None:
         if current_player.is_bankrupt: ## skip go
             loop_state = -1
         else:
-            print("Player " + str(current_turn) + "'s turn!")
+            main_window.add_text_log("player " + str(current_turn + 1) + "'s turn!")
             main_window.promptDiceRoll(current_turn + 1, current_player.is_agent)
             current_player.handling_action = True
     
@@ -156,8 +156,7 @@ def loop() -> None:
             current_turn = (current_turn + 1) % 6
             found_player = not players[current_turn].is_bankrupt 
         loop_state = 0
-        print(".")
-        print(".")
+        main_window.add_text_log(".")
     
     qtm.singleShot(500, loop)
 
@@ -229,7 +228,8 @@ def pull_potluck_card(player:plyr.player) -> None:
     
     action = picked_card[1]
     operand = picked_card[2]
-    print("Pot Luck card pulled - " + picked_card[0])
+    main_window.add_text_log("Player " + str(player.player_num + 1) + " pulled the Pot luck card:")
+    main_window.add_text_log("'" + picked_card[0] + "'")
     
     match action:
         case 0: ## get money
@@ -281,7 +281,8 @@ def pull_opp_knock_card(player:plyr.player) -> None:
     
     action = picked_card[1]
     operand = picked_card[2]
-    print("Oppotunity Knocks card pulled - " + picked_card[0])
+    main_window.add_text_log("Player " + str(player.player_num + 1) + " pulled the Oppotunity Knock card:")
+    main_window.add_text_log("'" + picked_card[0] + "'")
     
     match action:
         case 0: ## get money
@@ -329,6 +330,7 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
     
     player_icons:list = []
     money_texts:list[QLabel] = []
+    logs:list[str] = []
     
     def __init__(self):
         global main_window
@@ -348,12 +350,22 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.closebutton.setToolTip("Close Game")
         self.closebutton.clicked.connect(self.closebuttonpressed) #call to function when close button is pressed
 
-        #MoneyBoard
+        #Log board
+        self.logBoard = QLabel(self)
+        self.logBoard.setPixmap(QPixmap(get_image_path("LogBoardBackground.png", "LogBoard")))
+        self.logBoard.setGeometry(1500,60,400,800)
+        self.logBoard.setScaledContents(True)
+        
+        self.logText = QLabel(self.logBoard)
+        self.logText.setStyleSheet("font-size: 20px; color: black; background: transparent;")
+        self.logText.setFixedSize(400, 800)
+        self.logText.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+        #Money board
         self.moneyBoard = QLabel(self)
         self.moneyBoard.setPixmap(QPixmap(get_image_path("moneyBoardbackground.png", "MoneyBoard"))) #Money board
-        self.moneyBoard.setGeometry(5,5,435,960)
+        self.moneyBoard.setGeometry(5,5,435,900)
         self.moneyBoard.setScaledContents(True)
-
 
         self.moneyContainer = QWidget(self.moneyBoard)
         self.moneyContainer.setGeometry(10,60,445,800)
@@ -439,6 +451,21 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
             global players
             label:QLabel = self.money_texts[i]
             label.setText("£" + str(players[i].money))
+            
+    def add_text_log(self, text:str) -> None:
+        self.logs.append(text)
+        if len(self.logs) > 30:
+            self.logs.pop(0)
+            
+        text:str = ""
+        for i in range(len(self.logs)):
+            if self.logs[i] == ".":
+                text = text + "\n"
+            else:
+                text = text + "\n - " + self.logs[i]
+        
+        self.logText.setText(text)    
+        
         
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
 
@@ -684,7 +711,7 @@ class diceRoll(qtw.QMainWindow):
             self.diceRollMethod()
     
     def diceRollMethod(self):
-        global previous_roll, previous_roll_was_double, loop_state
+        global previous_roll, previous_roll_was_double, loop_state, main_window
         self.animationCounter = 0 #reset the animation counter so that it can run again if a double is rolled.
         self.diceRollButton.setDisabled(True) #disable button
         
@@ -693,7 +720,7 @@ class diceRoll(qtw.QMainWindow):
         total = diceRoll1 + diceRoll2
         previous_roll = total
         
-        print("roll: " + str(total))
+        main_window.add_text_log("roll: " + str(total))
         
         if diceRoll1 == 4 and diceRoll2 == 3: #ignore this 
             self.conor.setStyleSheet("background-image: url("+ get_image_path("Snapchat-675243558.jpg", "Other") +"); background-repeat: no-repeat; background-position: center;")

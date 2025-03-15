@@ -28,8 +28,9 @@ class player:
     
     main_window = None
     
-    def __init__(self, index:int):
+    def __init__(self, index:int, mainwindow):
         self.player_num = index
+        self.main_window = mainwindow
     
     def move(self, roll:int, main_window) -> None:
         self.main_window = main_window
@@ -47,7 +48,6 @@ class player:
             self.moving = False
        
     def go_to(self, position:int) -> None:
-        print("player go to position " + str(position))
         old_position = self.position
         self.position = position
         self.main_window.move_player_icon(self.player_num, spceDict.space_positions[self.position])
@@ -60,18 +60,18 @@ class player:
             self.is_bankrupt = True
             prev_money = self.money
             self.money = 0
+            self.main_window.add_text_log("PLAYER " + str(self.player_num + 1) + " IS BANKRUPT!")
             return prev_money
-            print("PLAYER" + str(self.player_num) + "BANKRUPT")
         else:
             self.money -= amount
             return amount
     
     def pay_player(self, to:player, amount:int) -> None:
         to.money += self.attempt_pay(amount)
-        print("player " + str(self.player_num) + " payed player " + str(to.player_num) + " £" + str(amount))
+        self.main_window.add_text_log("player " + str(self.player_num + 1) + " payed player " + str(to.player_num + 1) + " £" + str(amount))
 
     def property_purchase(self, space:space.space) -> None:
-        print("player " + str(self.player_num) + " purchased property " + space.name)
+        self.main_window.add_text_log("player " + str(self.player_num) + " purchased property " + space.name)
         self.money -= space.cost
         space.owner = self
         self.properties.append(space)
@@ -81,7 +81,7 @@ class player:
         self.jail_turns = 0
         self.position = 10
         self.main_window.move_player_icon(self.player_num, spceDict.jail_position)
-        print("player " + str(self.player_num) + " went to jail")
+        self.main_window.add_text_log("player " + str(self.player_num + 1) + " went to jail")
     
     ## AGENTS -----------------------------------------------------------------------
     
@@ -123,7 +123,7 @@ class player:
             return False
         
         if self.is_henry:
-            print("ALL IN MOTHER FUCKERS")
+            self.main_window.add_text_log("ALL IN!!")
             return True
         
         true_decision_chance = self.decision_chance
