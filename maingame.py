@@ -382,8 +382,8 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.moneylayout.setSpacing(1)
 
         #creates an array of playerMoneydisplays
-        playerCountMoney = ["BootM.png", "SmartphoneM.png", "CatM.png", "HatstandM.png", "ShipM.png", "MoneyP5.png"] ## replace two final with new
-        playerGamePeice = ["Boot.png", "Smartphone.png", "Cat.png", "HatStand.png",  "Ship.png", "Boot.png"]
+        playerCountMoney = ["BootM.png", "SmartphoneM.png", "CatM.png", "HatstandM.png", "ShipM.png", "IronM.png"] ## replace two final with new
+        playerGamePeice = ["Boot.png", "Smartphone.png", "Cat.png", "HatStand.png",  "Ship.png", "Iron.png"]
 
         #Display Player Money on board
         for i in range(6):
@@ -721,8 +721,8 @@ class diceRoll(qtw.QMainWindow):
         self.animationCounter = 0 #reset the animation counter so that it can run again if a double is rolled.
         self.diceRollButton.setDisabled(True) #disable button
         
-        diceRoll1 = ran.randint(1,6) #conor, when testing for double rolls, you can change these values both to the same integer to force a double roll x
-        diceRoll2 = ran.randint(1,6)
+        diceRoll1 = ran.randint(1, 6) #conor, when testing for double rolls, you can change these values both to the same integer to force a double roll x
+        diceRoll2 = ran.randint(1, 6)
         total = diceRoll1 + diceRoll2
         previous_roll = total
         
