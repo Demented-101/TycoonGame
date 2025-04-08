@@ -35,13 +35,13 @@ class space:
         self.rent = space_temp["prices"][3:7]
         self.benefit = space_temp["benefit"]
 
-    def get_price(self) -> int:
+    def get_price(self, roll:int = 0) -> int:
         amount_in_group:int = 0 ## get amount in same set
-        for i in self.owner.properties:
+        for i in self.owner.properties and i != self:
             if i.group == self.group: amount_in_group += 1
 
         if self.group == -1:
-            return 0 ## TODO
+            return roll * [4, 10][amount_in_group]
         
         if self.group == 0: ## station:
             return [25, 50, 100, 200][amount_in_group]

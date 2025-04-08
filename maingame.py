@@ -56,6 +56,12 @@ main_window:qtw.QMainWindow
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+## NEEDED WINDOWS - 
+# - Buy houses from sets
+# - pay 10 or opp knock card
+# - pay to leave jail
+# - game end/win window
+
 #declaration of functions that require global scope (may be used across multiple windows)
 
 def get_image_path(name:str, folder:str) -> str:

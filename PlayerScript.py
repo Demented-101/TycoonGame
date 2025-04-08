@@ -95,7 +95,7 @@ class player:
     
     def setup_agent(self) -> None:
         self.is_agent = True
-        self.decision_chance = ran.randint(15, 85)
+        self.decision_chance = ran.randint(45, 85)
         self.poor_decision_chance = self.decision_chance - ran.randint(10, 40)
         self.poor_threshold = ran.random() + 1.5
         if self.poor_threshold > 2.3:
@@ -104,7 +104,7 @@ class player:
             self.absolute_no_dist = ran.randint(0, 30)
         self.group_preference = 1.2 + (ran.random() * 0.5)
         self.jail_benefit = ran.random() + 0.5
-        self.is_henry = ran.randint(0, 99) == 69
+        self.is_henry = ran.randint(0, 99) == 50
         
     def decide_property_benefit(self, space:space.space) -> float:
         benefit:float = space.benefit
