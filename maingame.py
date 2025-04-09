@@ -811,8 +811,6 @@ class PropertyWindow(qtw.QMainWindow):
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class getOutofJailWindow(qtw.QMainWindow):
-    player:plyr.player
-    space:spce.space
 
     def __init__(self):
         super().__init__()
@@ -826,14 +824,12 @@ class getOutofJailWindow(qtw.QMainWindow):
         self.JailYes.setIconSize(qtc.QSize(180,350)) 
         self.JailYes.setGeometry(100,300,300,90)
         self.JailYes.setStyleSheet("QPushButton {background: transparent; border: none;}")
-        self.JailYes.pressed.connect(lambda : self.button_pressed(True))
 
         self.JailNo = qtw.QPushButton("",self)
         self.JailNo.setIcon(qtg.QIcon(get_image_path("No.png", "Property_Buy")))
         self.JailNo.setIconSize(qtc.QSize(180,350)) 
         self.JailNo.setGeometry(300,300,700,90)
         self.JailNo.setStyleSheet("QPushButton {background: transparent; border: none;}")
-        self.JailNo.pressed.connect(lambda : self.button_pressed(False))
         
         self.show()
         
@@ -862,17 +858,26 @@ class buyHouse(qtw.QMainWindow):
         self.HouseNo.setGeometry(300,300,700,90)
         self.HouseNo.setStyleSheet("QPushButton {background: transparent; border: none;}")
         self.HouseNo.pressed.connect(lambda : self.button_pressed(False))
+
+
+        def button_pressed(self, accept:bool):
+            if accept:
+                property_own_image_path = get_image_path(spceDict.space_card_paths[space_index],"PropertyCards")
+        print(card_image_path)
+        if spceDict.space_card_paths[space_index] != "N/a":
+            self.cardWindow = qtw.QLabel(self)
+            self.cardWindow.setGeometry(200,310,500,1000)
+            self.cardWindow.setStyleSheet("background-image: url(" + card_image_path + "); background-repeat: repeat;")
         
         self.show()
-        
-    def button_pressed(self, accept:bool):
-        self.close()
+
+        self.show()
 
 
 
 
 
 app = qtw.QApplication([])
-mw = StartWindow()
+mw = buyHouse()
 '''CONOR. WHEN TESTING, CHANGE THE VALUE OF 'mw' TO THE NAME OF THE UI CLASS YOU WANT TO TEST. THIS WILL MAKE IT DISPLAY. love you'''
 app.exec_()
