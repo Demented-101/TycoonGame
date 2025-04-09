@@ -129,6 +129,7 @@ def loop() -> None:
                     current_player.position = 10
                     allow_move = True
                 else:
+                    getOutofJailWindow()
                     loop_state = -1
                     allow_move = False
             
@@ -797,8 +798,69 @@ class PropertyWindow(qtw.QMainWindow):
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+class getOutofJailWindow(qtw.QMainWindow):
+    player:plyr.player
+    space:spce.space
+
+    def __init__(self):
+        super().__init__()
+        
+        self.setWindowTitle("Jail")
+        self.resize(926,652)
+        self.setStyleSheet("background-image: url('"+ get_image_path("jail_background", "Jail") +"'); background-repeat: repeat;")
+        
+        self.JailYes = qtw.QPushButton("",self)
+        self.JailYes.setIcon(qtg.QIcon(get_image_path("Yes.png", "Property_Buy")))
+        self.JailYes.setIconSize(qtc.QSize(180,350)) 
+        self.JailYes.setGeometry(100,300,300,90)
+        self.JailYes.setStyleSheet("QPushButton {background: transparent; border: none;}")
+        self.JailYes.pressed.connect(lambda : self.button_pressed(True))
+
+        self.JailNo = qtw.QPushButton("",self)
+        self.JailNo.setIcon(qtg.QIcon(get_image_path("No.png", "Property_Buy")))
+        self.JailNo.setIconSize(qtc.QSize(180,350)) 
+        self.JailNo.setGeometry(300,300,700,90)
+        self.JailNo.setStyleSheet("QPushButton {background: transparent; border: none;}")
+        self.JailNo.pressed.connect(lambda : self.button_pressed(False))
+        
+        self.show()
+        
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+class buyHouse(qtw.QMainWindow):
+
+    def __init__(self):
+        super().__init__()
+        
+        self.setWindowTitle("Buy House")
+        self.resize(926,652)
+        self.setStyleSheet("background-image: url('"+ get_image_path("house_buy.png", "House") +"'); background-repeat: repeat;")
+        
+        self.HouseYes = qtw.QPushButton("",self)
+        self.HouseYes.setIcon(qtg.QIcon(get_image_path("Yes.png", "House")))
+        self.HouseYes.setIconSize(qtc.QSize(800,550)) 
+        self.HouseYes.setGeometry(100,300,300,90)
+        self.HouseYes.setStyleSheet("QPushButton {background: transparent; border: none;}")
+        self.HouseYes.pressed.connect(lambda : self.button_pressed(True))
+
+        self.HouseNo = qtw.QPushButton("",self)
+        self.HouseNo.setIcon(qtg.QIcon(get_image_path("No.png", "House")))
+        self.HouseNo.setIconSize(qtc.QSize(800,550)) 
+        self.HouseNo.setGeometry(300,300,700,90)
+        self.HouseNo.setStyleSheet("QPushButton {background: transparent; border: none;}")
+        self.HouseNo.pressed.connect(lambda : self.button_pressed(False))
+        
+        self.show()
+        
+    def button_pressed(self, accept:bool):
+        self.close()
+
+
+
+
+
 app = qtw.QApplication([])
 mw = StartWindow()
 '''CONOR. WHEN TESTING, CHANGE THE VALUE OF 'mw' TO THE NAME OF THE UI CLASS YOU WANT TO TEST. THIS WILL MAKE IT DISPLAY. love you'''
-
 app.exec_()
