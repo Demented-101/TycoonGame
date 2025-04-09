@@ -139,7 +139,7 @@ def loop() -> None:
                 previous_roll_was_double = False
                 
             if allow_move:
-                current_player.move(39 + 40, main_window)
+                current_player.move(previous_roll, main_window)
         
         if not current_player.moving: ## finished moving
             space = spaces[current_player.position]
