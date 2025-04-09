@@ -147,7 +147,14 @@ def loop() -> None:
             player_movement_finished(current_player, space)
             loop_state = 2
     
-    if loop_state == 2:
+    if loop_state == 2: ## buy houses on existing property sets
+        available_spaces:list = current_player.get_full_sets(True)
+        if len(available_spaces) > 0:
+            if current_player.is_agent:
+                current_player.agent_house_decision(available_spaces)
+        
+    
+    if loop_state == 3: ## ending turn - check for double roll
         if not current_player.handling_action:
             if previous_roll_was_double:
                 loop_state = 0 ## player reroll
@@ -159,9 +166,12 @@ def loop() -> None:
         
     elif loop_state == -1: ## turn finished
         found_player:bool = False
+        previous_player = current_player
         while not found_player:
             current_turn = (current_turn + 1) % 6
-            found_player = not players[current_turn].is_bankrupt 
+            found_player = not players[current_turn].is_bankrupt
+            if players[current_turn] == previous_player:
+                pass ## END GAME GOES HERE - CURRENT PLAYER HAS WON
         loop_state = 0
         main_window.add_text_log(".")
     
@@ -169,9 +179,10 @@ def loop() -> None:
 
 def player_movement_finished(player:plyr.player, space:spce.space) -> None:
     print("current properties- " + str(player.properties))
+    global previous_roll
     if space.is_property:
         if space.owner:
-            player.pay_player(space.owner, space.get_price()) # pay owner if owned
+            player.pay_player(space.owner, space.get_price(previous_roll)) # pay owner if owned
             player.handling_action = False
             
         elif player.money >= space.cost and player.passed_go:
@@ -783,6 +794,7 @@ class PropertyWindow(qtw.QMainWindow):
         self.propertyNo.pressed.connect(lambda : self.button_pressed(False))
 
         card_image_path = get_image_path(spceDict.space_card_paths[space_index],"PropertyCards")
+        print(card_image_path)
         if spceDict.space_card_paths[space_index] != "N/a":
             self.cardWindow = qtw.QLabel(self)
             self.cardWindow.setGeometry(200,310,500,1000)

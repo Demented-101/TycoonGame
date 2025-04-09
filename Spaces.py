@@ -37,8 +37,8 @@ class space:
 
     def get_price(self, roll:int = 0) -> int:
         amount_in_group:int = 0 ## get amount in same set
-        for i in self.owner.properties and i != self:
-            if i.group == self.group: amount_in_group += 1
+        for i in self.owner.properties:
+            if i.group == self.group and i != self: amount_in_group += 1
 
         if self.group == -1:
             return roll * [4, 10][amount_in_group]

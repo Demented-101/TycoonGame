@@ -5,11 +5,6 @@ import random as ran
 import time
 from PyQt5.QtCore import QTimer as qtm
 
-## PROMPTS NEEDED:
-    # purchase property
-    # leave Jail (50 payment)
-    # upgrade property prompt
-
 class player:
     player_num:int = 0
     is_agent:bool = False
@@ -71,7 +66,7 @@ class player:
         self.main_window.add_text_log("player " + str(self.player_num + 1) + " payed player " + str(to.player_num + 1) + " £" + str(amount))
 
     def property_purchase(self, space:space.space) -> None:
-        self.main_window.add_text_log("player " + str(self.player_num) + " purchased property " + space.name)
+        self.main_window.add_text_log("player " + str(self.player_num + 1) + " purchased property " + space.name)
         self.money -= space.cost
         space.owner = self
         self.properties.append(space)
@@ -83,6 +78,31 @@ class player:
         self.main_window.move_player_icon(self.player_num, spceDict.jail_position)
         self.main_window.add_text_log("player " + str(self.player_num + 1) + " went to jail")
     
+    def get_full_sets(self, colour_only:bool = True) -> list[int]:
+        checked_sets:list[int] = []
+        found_sets:list[int] = []
+        
+        if colour_only: checked_sets = [0, -1] ## remove stations and utils from search
+        
+        for prop in self.properties:
+            if prop.group in self.properties: continue ## skip checked sets
+            
+            checked_sets.append(prop.group)
+            found_in_set:int = 0
+            
+            for other in self.properties:
+                if other.group == prop.group: found_in_set += 1 ## find others in set
+            
+            if (prop.group == 1 or prop.group == 8 or prop.group == -1) and found_in_set == 2:
+                found_sets.append(prop.group)
+            elif prop.group == 0 and found_in_set == 4:
+                found_sets.append(prop.group)
+            elif found_in_set == 3:
+                found_sets.append(prop.group)
+        
+        return found_sets
+        
+    
     ## AGENTS -----------------------------------------------------------------------
     
     decision_chance:int = -1 ## chance that they will take a monetary decision
@@ -91,6 +111,7 @@ class player:
     absolute_no_dist:int = 10 ## how far the price must be from the amount of money the player has to always say no
     group_preference:float = 1.2 ## how much the benefit is multiplied per existing property in the same group
     jail_benefit:float = 1 ## benefit used when deciding to pay to leave jail.
+    house_chance:float = 0.1
     is_henry:bool = False ## will always go all in
     
     def setup_agent(self) -> None:
@@ -104,6 +125,7 @@ class player:
             self.absolute_no_dist = ran.randint(0, 30)
         self.group_preference = 1.2 + (ran.random() * 0.5)
         self.jail_benefit = ran.random() + 0.5
+        self.house_chance = 0.05 + (ran.random() / 5)
         self.is_henry = ran.randint(0, 99) == 50
         
     def decide_property_benefit(self, space:space.space) -> float:
@@ -135,4 +157,20 @@ class player:
         random_num = ran.randint(0,100)
         print("agent " + str(self.player_num) + " decided " + str(true_decision_chance > random_num) + ". chance - " + str(true_decision_chance))
         return true_decision_chance > random_num
+        
+    def agent_house_decision(self, available_sets:list[int]) -> None:
+        chosen_set = ran.choice()
+        
+        example_property:space.space = None
+        while example_property == None:
+            pick = ran.choose(self.properties)
+            if pick.group == chosen_set: example_property = pick
+        
+        if self.agent_decision(example_property.benefit, example_property.house_cost):
+            money -= example_property.house_cost
+            example_property.current_level += 1
+        
+            if ran.random() < self.house_chance: ## buy another
+                self.agent_house_decision(available_sets)
+        
         
