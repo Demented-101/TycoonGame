@@ -378,6 +378,7 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
     
     player_icons:list = []
     money_texts:list[QLabel] = []
+    houses:list = []
     logs:list[str] = []
     
     handling_jail:bool = False
@@ -410,15 +411,6 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.logText.setStyleSheet("font-size: 20px; color: black; background: transparent;")
         self.logText.setFixedSize(400, 800)
         self.logText.setAlignment(Qt.AlignmentFlag.AlignTop)
-
-
-        #House Icon 
-        self.house = QLabel(self)
-        self.house.setPixmap(QPixmap(get_image_path("house_icon.png", "House")))
-        self.house.setGeometry(640,670,220,190)
-        self.house.setScaledContents(True)
-        self.house.setStyleSheet("background: transparent; border: none; ")
-
 
         #Money board
         self.moneyBoard = QLabel(self)
@@ -514,6 +506,18 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
     def move_player_icon(self, player, position):
         icon = self.player_icons[player]
         icon.setGeometry(position[0] - 50, position[1] - 50, 100, 100)
+       
+    def make_house_icon(self, space) -> None:
+        house = QLabel(self)
+        self.houses.append(house)
+        
+        house.setPixmap(QPixmap(get_image_path("house_icon.png", "House")))
+        house.setScaledContents(True)
+        house.setStyleSheet("background: transparent; border: none; ")
+        
+        space.house_icon = house
+        position = spceDict.space_positions[space.space_index]
+        house.setGeometry(position[0],position[1],220,190)
        
     def update_money_text(self):
         for i in range(6): ## for each active player

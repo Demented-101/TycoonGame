@@ -16,6 +16,7 @@ class space:
     house_cost:int ## cost to buy house
     unleveled_rent:int ## used when the owner does not have the full set
     rent:list[int] = [] ## index 0 is full set no houses, index 1 is one house etc, so index 5 is hotel
+    house_icon = None
 
     def __init__(self, space:int) -> None:
         self.space_index = space
@@ -54,6 +55,14 @@ class space:
 
         else:
             return self.unleveled_rent
+    
+    def upgrade(self) -> None:
+        if self.current_level >=5: return
+        
+        self.current_level += 1
+        path = ["house_icon1.png", "house_icon2.png", "house_icon3.png", "house_icon4.png", "Mansion.png"][self.current_level]
+        full_path = "IMG/" + "House" + "/" + path
+        
     
 def load_spaces() -> list[space]:
     spaces:list[space] = []

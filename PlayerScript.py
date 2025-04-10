@@ -169,11 +169,12 @@ class player:
         example_property:space.space = None
         while example_property == None:
             pick = ran.choose(self.properties)
-            if pick.group == chosen_set: example_property = pick
+            if pick.group == chosen_set: 
+                example_property = pick
         
         if self.agent_decision(example_property.benefit, example_property.house_cost):
-            money -= example_property.house_cost
-            example_property.current_level += 1
+            self.attempt_pay(example_property.house_cost)
+            example_property.upgrade()
         
             if ran.random() < self.house_chance: ## buy another
                 self.agent_house_decision(available_sets)
