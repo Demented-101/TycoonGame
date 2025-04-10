@@ -116,7 +116,7 @@ class player:
     absolute_no_dist:int = 10 ## how far the price must be from the amount of money the player has to always say no
     group_preference:float = 1.2 ## how much the benefit is multiplied per existing property in the same group
     jail_benefit:float = 1 ## benefit used when deciding to pay to leave jail.
-    house_chance:float = 0.1
+    house_chance:float = 0.1 ## chance to buy a house
     is_henry:bool = False ## will always go all in
     
     def setup_agent(self) -> None:
