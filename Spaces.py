@@ -30,7 +30,10 @@ class space:
 
         self.group = space_temp["prices"][0]
         if self.group == -1 or self.group == 0: return ## is Util (-1) or Station (0)
-        self.house_cost = [0, 50, 50, 100, 100, 150, 150, 200, 200]
+        if self.group > 0:
+            self.house_cost = [0, 50, 50, 100, 100, 150, 150, 200, 200][self.group]
+        else:
+            self.house_cost = -1
         self.cost = space_temp["prices"][1]
         self.unleveled_rent = space_temp["prices"][2]
         self.rent = space_temp["prices"][3:7]

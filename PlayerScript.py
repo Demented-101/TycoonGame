@@ -90,7 +90,7 @@ class player:
         if colour_only: checked_sets = [0, -1] ## remove stations and utils from search
         
         for prop in self.properties:
-            if prop.group in self.properties: continue ## skip checked sets
+            if prop.group in checked_sets: continue ## skip checked sets
             
             checked_sets.append(prop.group)
             found_in_set:int = 0

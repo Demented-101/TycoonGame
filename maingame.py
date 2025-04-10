@@ -94,11 +94,6 @@ def start(player_count:int) -> None:
     potluck_cards = PotLuck.cards.copy()
     ran.shuffle(potluck_cards)
 
-    players[0].properties.append(spaces[1])
-    players[0].properties.append(spaces[3])
-    spaces[1].owner = players[0]
-    spaces[3].owner = players[0]
-
     qtm.singleShot(1000, loop) # wait until game loop starts
 
 loop_state:int = 0
@@ -148,6 +143,7 @@ def loop() -> None:
     
     if loop_state == 2: ## buy houses on existing property sets
         available_spaces:list = current_player.get_full_sets(True)
+        print(available_spaces)
         if len(available_spaces) > 0:
             if current_player.is_agent: ## agent buy houses
                 current_player.agent_house_decision(available_spaces)
