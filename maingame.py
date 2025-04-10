@@ -87,6 +87,7 @@ def start(player_count:int) -> None:
         players.append(plyr.player(i, main_window))
         if i >= player_count:
             players[i].setup_agent()
+            players[i].is_bankrupt = True
     
     spaces = spce.load_spaces() ## load spaces and cards
     opp_knock_cards = OppKnock.cards.copy()
@@ -174,14 +175,16 @@ def loop() -> None:
             else:
                 loop_state = 1
         
-    elif loop_state == -1: ## turn finished
+    if loop_state == -1: ## turn finished
         found_player:bool = False
         previous_player = current_player
         while not found_player:
             current_turn = (current_turn + 1) % 6
             found_player = not players[current_turn].is_bankrupt
             if players[current_turn] == previous_player:
-                pass ## END GAME GOES HERE - CURRENT PLAYER HAS WON
+                main_window.promptGameEnd()
+                return
+                
         loop_state = 0
         main_window.add_text_log(".")
     
@@ -495,6 +498,9 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
     
     def promptBuyHouse(self, player):
         self.housePrompt = buyHouse(player)
+    
+    def promptGameEnd(self):
+        self.gemeEndWindow = endGame()
     
     def move_player_icon(self, player, position):
         icon = self.player_icons[player]
@@ -953,6 +959,15 @@ class buyHouse(qtw.QMainWindow):
             property_own_image_path = get_image_path(spceDict.space_card_paths[space_index],"PropertyCards")
         else:
             loop_state = 3
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+class endGame(qtw.QMainWindow):
+    def __init__(self):
+        super().__init__()
+        ## its here henry :D (love you)
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app = qtw.QApplication([])
 mw = StartWindow()
