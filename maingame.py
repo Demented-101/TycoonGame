@@ -144,11 +144,16 @@ def loop() -> None:
     if loop_state == 2: ## buy houses on existing property sets
         available_spaces:list = current_player.get_full_sets(True)
         if len(available_spaces) > 0:
-            if current_player.is_agent:
+            if current_player.is_agent: ## agent buy houses
                 current_player.agent_house_decision(available_spaces)
+                loop_state = 3
+
+            else: ## player buy houses
+                pass
         
-        loop_state = 3
-        
+        else: ## skip
+            loop_state = 3
+                
     if loop_state == 3: ## ending turn - check for double roll
         if not current_player.handling_action:
             if previous_roll_was_double:
@@ -487,6 +492,9 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
     def promptLeaveJail(self, player):
         self.handling_jail = True
         self.jail_window = getOutofJailWindow(player)
+    
+    def promptBuyHouse(self, player):
+        self.housePrompt = buyHouse(player)
     
     def move_player_icon(self, player, position):
         icon = self.player_icons[player]
@@ -907,9 +915,10 @@ class getOutofJailWindow(qtw.QMainWindow):
 
 class buyHouse(qtw.QMainWindow):
 
-    def __init__(self):
+    def __init__(self, player:plyr.player):
         super().__init__()
         
+        self.player = player
         self.setWindowTitle("Buy House")
         self.resize(926,652)
         self.setStyleSheet("background-image: url('"+ get_image_path("house_buy.png", "House") +"'); background-repeat: repeat;")
@@ -938,9 +947,12 @@ class buyHouse(qtw.QMainWindow):
         self.show()
 
     def button_pressed(self, accept:bool):
+        global loop_state
         space_index = 0
         if accept:
             property_own_image_path = get_image_path(spceDict.space_card_paths[space_index],"PropertyCards")
+        else:
+            loop_state = 3
 
 app = qtw.QApplication([])
 mw = StartWindow()
