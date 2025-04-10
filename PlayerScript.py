@@ -164,16 +164,17 @@ class player:
         return true_decision_chance > random_num
         
     def agent_house_decision(self, available_sets:list[int]) -> None:
-        chosen_set = ran.choice()
+        chosen_set = ran.choice(available_sets)
         
         example_property:space.space = None
         while example_property == None:
-            pick = ran.choose(self.properties)
-            if pick.group == chosen_set: example_property = pick
+            pick = ran.choice(self.properties)
+            if pick.group == chosen_set: 
+                example_property = pick
         
         if self.agent_decision(example_property.benefit, example_property.house_cost):
-            money -= example_property.house_cost
-            example_property.current_level += 1
+            self.attempt_pay(example_property.house_cost)
+            example_property.upgrade()
         
             if ran.random() < self.house_chance: ## buy another
                 self.agent_house_decision(available_sets)

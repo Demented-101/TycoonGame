@@ -87,13 +87,17 @@ def start(player_count:int) -> None:
         players.append(plyr.player(i, main_window))
         if i >= player_count:
             players[i].setup_agent()
-            players[i].is_bankrupt = True
     
     spaces = spce.load_spaces() ## load spaces and cards
     opp_knock_cards = OppKnock.cards.copy()
     ran.shuffle(opp_knock_cards)
     potluck_cards = PotLuck.cards.copy()
     ran.shuffle(potluck_cards)
+
+    players[0].properties.append(spaces[1])
+    players[0].properties.append(spaces[3])
+    spaces[1].owner = players[0]
+    spaces[3].owner = players[0]
 
     qtm.singleShot(1000, loop) # wait until game loop starts
 
@@ -135,7 +139,7 @@ def loop() -> None:
                 previous_roll_was_double = False
                 
             if allow_move:
-                current_player.move(30, main_window) # change back to previous roll
+                current_player.move(30, main_window)
         
         if not current_player.moving: ## finished moving
             space = spaces[current_player.position]
@@ -150,7 +154,8 @@ def loop() -> None:
                 loop_state = 3
 
             else: ## player buy houses
-                pass
+                main_window.promptBuyHouse(current_player)
+                return
         
         else: ## skip
             loop_state = 3
@@ -216,8 +221,12 @@ def player_movement_finished(player:plyr.player, space:spce.space) -> None:
         match space.action:
             case -1: pass ## no action
             
-            case 0: pull_opp_knock_card(player)
-            case 1: pull_potluck_card(player)
+            case 0: 
+                pull_opp_knock_card(player)
+                player.handling_action = True
+            case 1: 
+                pull_potluck_card(player)
+                player.handling_action = True
             
             case 2: ## take FP
                 player.money += free_parking_pot
@@ -374,6 +383,7 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
     
     player_icons:list = []
     money_texts:list[QLabel] = []
+    houses:list = []
     logs:list[str] = []
     
     handling_jail:bool = False
@@ -406,15 +416,6 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.logText.setStyleSheet("font-size: 20px; color: black; background: transparent;")
         self.logText.setFixedSize(400, 800)
         self.logText.setAlignment(Qt.AlignmentFlag.AlignTop)
-
-
-        #House Icon 
-        self.house = QLabel(self)
-        self.house.setPixmap(QPixmap(get_image_path("house_icon.png", "House")))
-        self.house.setGeometry(640,670,220,190)
-        self.house.setScaledContents(True)
-        self.house.setStyleSheet("background: transparent; border: none; ")
-
 
         #Money board
         self.moneyBoard = QLabel(self)
@@ -510,6 +511,18 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
     def move_player_icon(self, player, position):
         icon = self.player_icons[player]
         icon.setGeometry(position[0] - 50, position[1] - 50, 100, 100)
+       
+    def make_house_icon(self, space) -> None:
+        house = QLabel(self)
+        self.houses.append(house)
+        
+        house.setPixmap(QPixmap(get_image_path("house_icon.png", "House")))
+        house.setScaledContents(True)
+        house.setStyleSheet("background: transparent; border: none; ")
+        
+        space.house_icon = house
+        position = spceDict.space_positions[space.space_index]
+        house.setGeometry(position[0],position[1],220,190)
        
     def update_money_text(self):
         for i in range(6): ## for each active player
@@ -963,9 +976,14 @@ class buyHouse(qtw.QMainWindow):
         global loop_state
         space_index = 0
         if accept:
-            property_own_image_path = get_image_path(spceDict.space_card_paths[space_index],"PropertyCards")
+            properties_to_show:list[int] = []
+            for i in player.get_full_sets():
+                pass
+                
         else:
             loop_state = 3
+            qtm.singleShot(50, loop)
+            self.close()
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------
 
