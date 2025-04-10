@@ -408,6 +408,15 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
         self.logText.setFixedSize(400, 800)
         self.logText.setAlignment(Qt.AlignmentFlag.AlignTop)
 
+
+        #House Icon 
+        self.house = QLabel(self)
+        self.house.setPixmap(QPixmap(get_image_path("house_icon.png", "House")))
+        self.house.setGeometry(640,670,220,190)
+        self.house.setScaledContents(True)
+        self.house.setStyleSheet("background: transparent; border: none; ")
+
+
         #Money board
         self.moneyBoard = QLabel(self)
         self.moneyBoard.setPixmap(QPixmap(get_image_path("moneyBoardbackground.png", "MoneyBoard"))) #Money board
@@ -953,6 +962,10 @@ class buyHouse(qtw.QMainWindow):
             property_own_image_path = get_image_path(spceDict.space_card_paths[space_index],"PropertyCards")
         else:
             loop_state = 3
+
+
+
+
 
 app = qtw.QApplication([])
 mw = StartWindow()

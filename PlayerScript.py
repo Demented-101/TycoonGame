@@ -5,6 +5,11 @@ import random as ran
 import time
 from PyQt5.QtCore import QTimer as qtm
 
+## PROMPTS NEEDED:
+    # purchase property
+    # leave Jail (50 payment)
+    # upgrade property prompt
+
 class player:
     player_num:int = 0
     is_agent:bool = False
