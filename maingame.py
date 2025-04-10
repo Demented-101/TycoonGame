@@ -1001,6 +1001,6 @@ class endGame(qtw.QMainWindow):
 #----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app = qtw.QApplication([])
-mw = OppKnocksWindow()
+mw = StartWindow()
 '''CONOR. WHEN TESTING, CHANGE THE VALUE OF 'mw' TO THE NAME OF THE UI CLASS YOU WANT TO TEST. THIS WILL MAKE IT DISPLAY. love you'''
 app.exec_()
