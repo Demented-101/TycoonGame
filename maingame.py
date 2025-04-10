@@ -139,7 +139,7 @@ def loop() -> None:
                 previous_roll_was_double = False
                 
             if allow_move:
-                current_player.move(previous_roll, main_window)
+                current_player.move(30, main_window)
         
         if not current_player.moving: ## finished moving
             space = spaces[current_player.position]
@@ -974,7 +974,10 @@ class buyHouse(qtw.QMainWindow):
         global loop_state
         space_index = 0
         if accept:
-            property_own_image_path = get_image_path(spceDict.space_card_paths[space_index],"PropertyCards")
+            properties_to_show:list[int] = []
+            for i in player.get_full_sets():
+                pass
+                
         else:
             loop_state = 3
             qtm.singleShot(50, loop)
