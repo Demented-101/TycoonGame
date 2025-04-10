@@ -87,13 +87,17 @@ def start(player_count:int) -> None:
         players.append(plyr.player(i, main_window))
         if i >= player_count:
             players[i].setup_agent()
-            players[i].is_bankrupt = True
     
     spaces = spce.load_spaces() ## load spaces and cards
     opp_knock_cards = OppKnock.cards.copy()
     ran.shuffle(opp_knock_cards)
     potluck_cards = PotLuck.cards.copy()
     ran.shuffle(potluck_cards)
+
+    players[0].properties.append(spaces[1])
+    players[0].properties.append(spaces[3])
+    spaces[1].owner = players[0]
+    spaces[3].owner = players[0]
 
     qtm.singleShot(1000, loop) # wait until game loop starts
 
@@ -150,7 +154,8 @@ def loop() -> None:
                 loop_state = 3
 
             else: ## player buy houses
-                pass
+                main_window.promptBuyHouse(current_player)
+                return
         
         else: ## skip
             loop_state = 3
@@ -976,6 +981,8 @@ class buyHouse(qtw.QMainWindow):
             property_own_image_path = get_image_path(spceDict.space_card_paths[space_index],"PropertyCards")
         else:
             loop_state = 3
+            qtm.singleShot(50, loop)
+            self.close()
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------
 
