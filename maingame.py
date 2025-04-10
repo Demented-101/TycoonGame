@@ -94,11 +94,6 @@ def start(player_count:int) -> None:
     potluck_cards = PotLuck.cards.copy()
     ran.shuffle(potluck_cards)
 
-    players[0].properties.append(spaces[1])
-    players[0].properties.append(spaces[3])
-    spaces[1].owner = players[0]
-    spaces[3].owner = players[0]
-
     qtm.singleShot(1000, loop) # wait until game loop starts
 
 loop_state:int = 0
@@ -139,7 +134,7 @@ def loop() -> None:
                 previous_roll_was_double = False
                 
             if allow_move:
-                current_player.move(previous_roll, main_window)
+                current_player.move(30, main_window)
         
         if not current_player.moving: ## finished moving
             space = spaces[current_player.position]
@@ -148,6 +143,7 @@ def loop() -> None:
     
     if loop_state == 2: ## buy houses on existing property sets
         available_spaces:list = current_player.get_full_sets(True)
+        print(available_spaces)
         if len(available_spaces) > 0:
             if current_player.is_agent: ## agent buy houses
                 current_player.agent_house_decision(available_spaces)
@@ -237,11 +233,7 @@ def player_movement_finished(player:plyr.player, space:spce.space) -> None:
                 free_parking_pot += player.attempt_pay(100)
             
             case 5:  ## go to jail
-                player.go_to_jail()
-                
-                global previous_roll_was_double, double_count ## reset double roll
-                previous_roll_was_double = False
-                double_count = 0
+                player_send_to_jail(player)
 
 def player_send_to_jail(player:plyr.player) -> None:
     player.go_to_jail()
@@ -313,7 +305,7 @@ def pull_potluck_card(player:plyr.player) -> None:
             global free_parking_pot
             free_parking_pot += player.attempt_pay(operand)
         case 4: ## go to jail
-            player.go_to_jail()
+            player_send_to_jail(player)
         case 5: ## all players pay player
             global players
             targets = players.copy()
@@ -376,7 +368,7 @@ def pull_opp_knock_card(player:plyr.player) -> None:
             new_position = player.position - operand
             player.go_to(new_position)
         case 6:
-            player.go_to_jail()
+            player_send_to_jail(player)
         case 7:
             player.GOOJ_cards.append(True)
             opp_knock_cards.remove(picked_card) ## remove the card from the deck
@@ -885,19 +877,21 @@ class getOutofJailWindow(qtw.QMainWindow):
         
         global players, current_turn
         if len(players[current_turn].GOOJ_cards) > 0:
-            self.JailGOOJ = qtw.QPushButton("",self)
-            self.JailGOOJ.setIcon(qtg.QIcon(get_image_path("Yes.png", "Property_Buy")))
-            self.JailGOOJ.setIconSize(qtc.QSize(180,350)) 
-            self.JailGOOJ.setGeometry(100,230,300,90)
-            self.JailGOOJ.setStyleSheet("QPushButton {background: transparent; border: none;}")
-            self.JailGOOJ.clicked.connect(self.press_GOOJ)
         
-        self.JailYes = qtw.QPushButton("",self)
-        self.JailYes.setIcon(qtg.QIcon(get_image_path("Yes.png", "Property_Buy")))
-        self.JailYes.setIconSize(qtc.QSize(180,350)) 
-        self.JailYes.setGeometry(100,300,300,90)
-        self.JailYes.setStyleSheet("QPushButton {background: transparent; border: none;}")
-        self.JailYes.clicked.connect(self.press_yes)
+            self.JailYes = qtw.QPushButton("",self)
+            self.JailYes.setIconSize(qtc.QSize(180,350)) 
+            self.JailYes.setGeometry(100,300,300,90)
+            self.JailYes.setStyleSheet("QPushButton {background: transparent; border: none;}")
+            if len(players[current_turn].GOOJ_cards) > 0:
+                self.JailYes.setIcon(qtg.QIcon(get_image_path("free.png", "Property_Buy")))
+                self.JailYes.clicked.connect(self.press_yes)
+                
+            else:
+                self.JailGOOJ.clicked.connect(self.press_GOOJ)
+                self.JailYes.setIcon(qtg.QIcon(get_image_path("pay50.png", "Property_Buy")))
+
+            
+
 
         self.JailNo = qtw.QPushButton("",self)
         self.JailNo.setIcon(qtg.QIcon(get_image_path("No.png", "Property_Buy")))
@@ -978,7 +972,10 @@ class buyHouse(qtw.QMainWindow):
         global loop_state
         space_index = 0
         if accept:
-            property_own_image_path = get_image_path(spceDict.space_card_paths[space_index],"PropertyCards")
+            properties_to_show:list[int] = []
+            for i in player.get_full_sets():
+                pass
+                
         else:
             loop_state = 3
             qtm.singleShot(50, loop)
