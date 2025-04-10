@@ -164,11 +164,11 @@ class player:
         return true_decision_chance > random_num
         
     def agent_house_decision(self, available_sets:list[int]) -> None:
-        chosen_set = ran.choice()
+        chosen_set = ran.choice(available_sets)
         
         example_property:space.space = None
         while example_property == None:
-            pick = ran.choose(self.properties)
+            pick = ran.choice(self.properties)
             if pick.group == chosen_set: 
                 example_property = pick
         
