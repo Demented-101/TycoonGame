@@ -221,8 +221,12 @@ def player_movement_finished(player:plyr.player, space:spce.space) -> None:
         match space.action:
             case -1: pass ## no action
             
-            case 0: pull_opp_knock_card(player)
-            case 1: pull_potluck_card(player)
+            case 0: 
+                pull_opp_knock_card(player)
+                player.handling_action = True
+            case 1: 
+                pull_potluck_card(player)
+                player.handling_action = True
             
             case 2: ## take FP
                 player.money += free_parking_pot
