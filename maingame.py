@@ -984,16 +984,26 @@ class buyHouse(qtw.QMainWindow):
             qtm.singleShot(50, loop)
             self.close()
 
+class OppKnocksWindow(qtw.QMainWindow):
+    def __init__(self):
+        super().__init__()
+
+        #self.player = player
+        self.setWindowTitle("OPPORTUNITY KNOCKS")
+        self.resize(926,652)
+        self.setStyleSheet("background-image: url('"+ get_image_path("OpportunityKnocks", "OPPKNOCKSBACKGROUND.png") +"'); background-repeat: repeat;")
+        self.show()
 #----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class endGame(qtw.QMainWindow):
     def __init__(self):
         super().__init__()
         ## its here henry :D (love you)
+        # LOVE YOU TOO CALLUM! HERE'S THE CODE!
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 app = qtw.QApplication([])
-mw = StartWindow()
+mw = OppKnocksWindow()
 '''CONOR. WHEN TESTING, CHANGE THE VALUE OF 'mw' TO THE NAME OF THE UI CLASS YOU WANT TO TEST. THIS WILL MAKE IT DISPLAY. love you'''
 app.exec_()
