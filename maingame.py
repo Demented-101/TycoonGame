@@ -123,15 +123,9 @@ def loop() -> None:
             allow_move:bool = True
             
             if current_player.in_jail: ## in jail
-                escaped = player_attempt_leave_jail(current_player, previous_roll_was_double)
-                if escaped:
-                    current_player.in_jail = False
-                    current_player.position = 10
-                    allow_move = True
-                else:
-                    getOutofJailWindow()
-                    loop_state = -1
-                    allow_move = False
+                loop_state = 4
+                qtm.singleShot(500, loop)
+                return
             
             if previous_roll_was_double and double_count == 1:
                 current_player.go_to_jail()
@@ -153,7 +147,8 @@ def loop() -> None:
             if current_player.is_agent:
                 current_player.agent_house_decision(available_spaces)
         
-    
+        loop_state = 3
+        
     if loop_state == 3: ## ending turn - check for double roll
         if not current_player.handling_action:
             if previous_roll_was_double:
@@ -163,6 +158,16 @@ def loop() -> None:
             else:
                 loop_state = -1
                 double_count = 0
+     
+    if loop_state == 4: ## handling jail
+        if new_state:
+            player_attempt_leave_jail(current_player, previous_roll_was_double)
+        
+        elif not main_window.handling_jail:
+            if current_player.in_jail:
+                loop_state = -1
+            else:
+                loop_state = 1
         
     elif loop_state == -1: ## turn finished
         found_player:bool = False
@@ -216,29 +221,46 @@ def player_movement_finished(player:plyr.player, space:spce.space) -> None:
             
             case 5:  ## go to jail
                 player.go_to_jail()
+                
+                global previous_roll_was_double, double_count ## reset double roll
+                previous_roll_was_double = False
+                double_count = 0
+
+def player_send_to_jail(player:plyr.player) -> None:
+    player.go_to_jail()
+    
+    global previous_roll_was_double, double_count, loop_state
+    loop_state = -1
+    previous_roll_was_double = False
+    double_count = 0
 
 def player_attempt_leave_jail(player:plyr.player, rolled_double:bool) -> bool:
-    if player.jail_turns == 3 or rolled_double:
-        return True
+    global loop_state, main_window
+    allow_leave = player.jail_turns == 3 or rolled_double
     
-    if len(player.GOOJ_cards) > 0:
-        global opp_knock_cards, potluck_cards
-        card = player.GOOJ_cards.pop()
-        ## add card back to proper deck
-        if card: opp_knock_cards.append(["Get out of jail Free", 7, -1])
-        else: potluck_cards.append(["Get out of jail Free", 6, -1])
-        
-        return True
-
-    if player.money > 50:
-        global free_parking_pot
-        if player.is_agent and player.agent_decision(player.jail_benefit, 50):
-            free_parking_pot += player.attempt_pay(50)
+    if not allow_leave:
+        if player.is_agent:
+            if len(player.GOOJ_cards) > 0:
+                allow_leave = True
+                global opp_knock_cards, potluck_cards
+                card = player.GOOJ_cards.pop()
+                ## add card back to proper deck
+                if card: opp_knock_cards.append(["Get out of jail Free", 7, -1])
+                else: potluck_cards.append(["Get out of jail Free", 6, -1])
+            
+            elif player.agent_decision(player.jail_benefit, 50):
+                global free_parking_pot
+                free_parking_pot += player.attempt_pay(50)
+                allow_leave = True
         else:
-            pass ## input window popup here
+            main_window.promptLeaveJail(player)
     
-    return False
-
+    if allow_leave:
+        global current_turn
+        main_window.add_text_log("Player " + str(current_turn + 1) + " has left jail")
+        player.in_jail = False
+        player.position = 10
+        
 def pull_potluck_card(player:plyr.player) -> None:
     global potluck_cards
     picked_card = potluck_cards.pop(0) ## take first card
@@ -350,6 +372,8 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
     money_texts:list[QLabel] = []
     logs:list[str] = []
     
+    handling_jail:bool = False
+    
     def __init__(self):
         global main_window
         main_window = self
@@ -459,7 +483,11 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
     def promptDiceRoll(self, player:int, speed_up:bool):
         self.dice_roll_open = diceRoll("Player " + str(player) + "'s turn!", speed_up)
         self.dice_roll_open.show()
-  
+    
+    def promptLeaveJail(self, player):
+        self.handling_jail = True
+        self.jail_window = getOutofJailWindow(player)
+    
     def move_player_icon(self, player, position):
         icon = self.player_icons[player]
         icon.setGeometry(position[0] - 50, position[1] - 50, 100, 100)
@@ -483,8 +511,7 @@ class MainWindow (qtw.QMainWindow): #Class for the main window of the game.
                 text = text + "\n - " + self.logs[i]
         
         self.logText.setText(text)    
-        
-        
+     
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
 
 class HelpWindow (qtw.QMainWindow): 
@@ -812,28 +839,70 @@ class PropertyWindow(qtw.QMainWindow):
 
 class getOutofJailWindow(qtw.QMainWindow):
 
-    def __init__(self):
+    def __init__(self, player:plyr.player):
         super().__init__()
         
+        self.player = player
         self.setWindowTitle("Jail")
         self.resize(926,652)
         self.setStyleSheet("background-image: url('"+ get_image_path("jail_background", "Jail") +"'); background-repeat: repeat;")
+        
+        global players, current_turn
+        if len(players[current_turn].GOOJ_cards) > 0:
+            self.JailGOOJ = qtw.QPushButton("",self)
+            self.JailGOOJ.setIcon(qtg.QIcon(get_image_path("Yes.png", "Property_Buy")))
+            self.JailGOOJ.setIconSize(qtc.QSize(180,350)) 
+            self.JailGOOJ.setGeometry(100,230,300,90)
+            self.JailGOOJ.setStyleSheet("QPushButton {background: transparent; border: none;}")
+            self.JailGOOJ.clicked.connect(self.press_GOOJ)
         
         self.JailYes = qtw.QPushButton("",self)
         self.JailYes.setIcon(qtg.QIcon(get_image_path("Yes.png", "Property_Buy")))
         self.JailYes.setIconSize(qtc.QSize(180,350)) 
         self.JailYes.setGeometry(100,300,300,90)
         self.JailYes.setStyleSheet("QPushButton {background: transparent; border: none;}")
+        self.JailYes.clicked.connect(self.press_yes)
 
         self.JailNo = qtw.QPushButton("",self)
         self.JailNo.setIcon(qtg.QIcon(get_image_path("No.png", "Property_Buy")))
         self.JailNo.setIconSize(qtc.QSize(180,350)) 
         self.JailNo.setGeometry(300,300,700,90)
         self.JailNo.setStyleSheet("QPushButton {background: transparent; border: none;}")
+        self.JailNo.clicked.connect(self.press_no)
         
         self.show()
+    
+    def press_GOOJ(self):
+        global main_window
+        main_window.handling_jail = False
         
+        global opp_knock_cards, potluck_cards
+        self.let_player_out()
+        card = self.player.GOOJ_cards.pop()
+        ## add card back to proper deck
+        if card: opp_knock_cards.append(["Get out of jail Free", 7, -1])
+        else: potluck_cards.append(["Get out of jail Free", 6, -1])
+        
+        self.close()
+    
+    def press_yes(self):
+        global main_window
+        self.let_player_out()
+        self.player.attempt_pay(50)
+        main_window.handling_jail = False
+        self.close()
 
+    def let_player_out(self):
+        global main_window
+        main_window.add_text_log("Player " + str(current_turn + 1) + " has left jail")
+        self.player.in_jail = False
+        self.player.position = 10
+    
+    def press_no(self):
+        global main_window
+        main_window.handling_jail = False
+        self.close()
+        
 #----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class buyHouse(qtw.QMainWindow):
@@ -859,25 +928,21 @@ class buyHouse(qtw.QMainWindow):
         self.HouseNo.setStyleSheet("QPushButton {background: transparent; border: none;}")
         self.HouseNo.pressed.connect(lambda : self.button_pressed(False))
 
-
-        def button_pressed(self, accept:bool):
-            if accept:
-                property_own_image_path = get_image_path(spceDict.space_card_paths[space_index],"PropertyCards")
-        print(card_image_path)
+        space_index = 0
         if spceDict.space_card_paths[space_index] != "N/a":
+            card_image_path = spceDict.space_card_paths[space_index]
             self.cardWindow = qtw.QLabel(self)
             self.cardWindow.setGeometry(200,310,500,1000)
             self.cardWindow.setStyleSheet("background-image: url(" + card_image_path + "); background-repeat: repeat;")
         
         self.show()
 
-        self.show()
-
-
-
-
+    def button_pressed(self, accept:bool):
+        space_index = 0
+        if accept:
+            property_own_image_path = get_image_path(spceDict.space_card_paths[space_index],"PropertyCards")
 
 app = qtw.QApplication([])
-mw = buyHouse()
+mw = StartWindow()
 '''CONOR. WHEN TESTING, CHANGE THE VALUE OF 'mw' TO THE NAME OF THE UI CLASS YOU WANT TO TEST. THIS WILL MAKE IT DISPLAY. love you'''
 app.exec_()
